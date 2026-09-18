@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111111" />
+  <title>企鹅的每日计划</title>
+  <style>
+    :root {
+      --ink: #161616;
+      --muted: #858585;
+      --soft: #f4f4f2;
+      --line: #dededb;
+      --paper: #fbfbfa;
+      --panel: #ffffff;
+      --shadow: 0 24px 60px rgba(20, 20, 20, .09), 0 2px 8px rgba(20, 20, 20, .04);
+      --radius-xl: 32px;
+      --radius-lg: 22px;
+      --radius-md: 15px;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--soft);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      letter-spacing: .01em;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      width: 50vw;
+      height: 50vw;
+      max-width: 640px;
+      max-height: 640px;
+      top: -25vw;
+      right: -14vw;
+      background: radial-gradient(circle, rgba(255,255,255,.98), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+
+    button, textarea, input { font: inherit; }
+    button { cursor: pointer; }
+    .app { width: min(1160px, calc(100% - 40px)); margin: 0 auto; padding: 34px 0 52px; position: relative; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 34px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; letter-spacing: .08em; }
+    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; color: white; background: var(--ink); font-size: 17px; transform: rotate(-5deg); box-shadow: 0 5px 15px rgba(0,0,0,.15); }
+    .date-chip { color: var(--muted); font-size: 13px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 99px; background: rgba(255,255,255,.5); }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(330px, .94fr); gap: 22px; align-items: start; }
+    .panel { border: 1px solid rgba(255,255,255,.8); background: rgba(255,255,255,.76); border-radius: var(--radius-xl); box-shadow: var(--shadow); backdrop-filter: blur(12px); }
+    .main-panel { padding: clamp(28px, 5vw, 58px); min-height: 620px; display: flex; flex-direction: column; }
+    .eyebrow { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 21px; }
+    .question { font-size: clamp(30px, 4.2vw, 52px); line-height: 1.12; letter-spacing: -.055em; margin: 0; max-width: 620px; font-weight: 700; }
+    .question em { font-style: normal; color: #a3a3a0; }
+    .subcopy { color: var(--muted); margin: 17px 0 0; font-size: 14px; line-height: 1.8; max-width: 480px; }
+    .step { display: none; animation: slideIn .38s ease both; flex: 1; flex-direction: column; }
+    .step.active { display: flex; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .story-input { flex: 1; min-height: 190px; margin-top: 44px; resize: none; border: 0; border-bottom: 1px solid var(--line); padding: 0 0 16px; background: transparent; outline: none; font-size: 21px; line-height: 1.65; color: var(--ink); }
+    .story-input::placeholder { color: #b7b7b3; }
+    .story-input:focus { border-color: var(--ink); }
+    .actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 30px; }
+    .hint { color: var(--muted); font-size: 12px; }
+    .primary { border: 0; border-radius: 99px; color: #fff; background: var(--ink); padding: 14px 22px; font-weight: 650; font-size: 14px; box-shadow: 0 8px 18px rgba(0,0,0,.13); transition: transform .2s, box-shadow .2s; }
+    .primary:hover { transform: translateY(-2px); box-shadow: 0 12px 23px rgba(0,0,0,.18); }
+    .secondary { border: 1px solid var(--line); color: var(--ink); background: rgba(255,255,255,.65); border-radius: 99px; padding: 13px 18px; font-weight: 600; transition: background .2s; }
+    .secondary:hover { background: #fff; }
+
+    .group-builder { margin-top: 35px; display: flex; flex-direction: column; gap: 13px; }
+    .group { border: 1px solid var(--line); background: rgba(255,255,255,.6); border-radius: var(--radius-lg); padding: 17px; }
+    .group-head { display: flex; align-items: center; gap: 9px; }
+    .group-head input { flex: 1; min-width: 0; border: 0; outline: 0; font-weight: 700; font-size: 16px; background: transparent; color: var(--ink); }
+    .group-head input::placeholder { color: #b7b7b3; }
+    .icon-button { width: 28px; height: 28px; border: 0; border-radius: 50%; background: #ededeb; color: #727270; display: grid; place-items: center; font-size: 18px; line-height: 1; transition: background .2s; }
+    .icon-button:hover { background: #dededb; color: var(--ink); }
+    .tasks { display: grid; gap: 8px; margin-top: 15px; }
+    .task-row { display: flex; align-items: center; gap: 9px; min-height: 32px; }
+    .check { appearance: none; width: 20px; height: 20px; margin: 0; border: 1.5px solid #bcbcb8; border-radius: 7px; background: #fff; flex: 0 0 auto; position: relative; transition: all .2s; }
+    .check:checked { background: var(--ink); border-color: var(--ink); }
+    .check:checked::after { content: "✓"; color: #fff; position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+    .task-input { flex: 1; min-width: 0; border: 0; outline: 0; border-bottom: 1px solid transparent; font-size: 14px; background: transparent; color: var(--ink); padding: 5px 0; }
+    .task-input:focus { border-bottom-color: var(--line); }
+    .task-row.done .task-input { color: #a0a09c; text-decoration: line-through; }
+    .task-note { color: #858581; font-size: 11px; white-space: nowrap; }
+    .add-task { margin-top: 13px; border: 0; background: none; color: #888884; font-size: 12px; padding: 4px 0; text-align: left; }
+    .add-task:hover { color: var(--ink); }
+    .add-group { margin-top: 2px; border: 1px dashed #bdbdb9; color: #696966; background: transparent; border-radius: var(--radius-lg); padding: 16px; width: 100%; font-size: 13px; transition: border .2s, background .2s; }
+    .add-group:hover { background: rgba(255,255,255,.75); border-color: var(--ink); }
+
+    .side-panel { padding: 28px; position: sticky; top: 20px; }
+    .side-title { display: flex; justify-content: space-between; align-items: start; margin-bottom: 23px; }
+    .side-title h2 { font-size: 18px; margin: 0; letter-spacing: -.03em; }
+    .side-title span { color: var(--muted); font-size: 12px; }
+    .progress-wrap { padding: 17px; border-radius: var(--radius-lg); background: #f1f1ef; margin-bottom: 22px; }
+    .progress-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 13px; }
+    .progress-label strong { font-size: 30px; letter-spacing: -.06em; }
+    .progress-label span { color: var(--muted); font-size: 12px; }
+    .progress-track { height: 6px; border-radius: 99px; background: #dddcd8; overflow: hidden; }
+    .progress-bar { width: 0%; height: 100%; border-radius: inherit; background: var(--ink); transition: width .35s ease; }
+    .plan-summary { display: grid; gap: 10px; }
+    .summary-empty { color: #a3a39f; font-size: 13px; line-height: 1.7; padding: 17px 2px; }
+    .summary-group { padding: 14px 0 3px; border-bottom: 1px solid #ecece9; }
+    .summary-group:last-child { border-bottom: 0; }
+    .summary-group-name { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; }
+    .summary-count { color: var(--muted); font-size: 11px; font-weight: 500; }
+    .summary-task { color: #6d6d69; font-size: 12px; line-height: 1.7; margin: 7px 0 0; display: flex; gap: 7px; }
+    .summary-task::before { content: "·"; color: #aaa; }
+    .summary-task.done { color: #b2b2ae; text-decoration: line-through; }
+    .summary-task.done::before { content: "✓"; color: var(--ink); }
+    .save-note { display: flex; gap: 9px; align-items: center; border-top: 1px solid #ecece9; margin-top: 22px; padding-top: 20px; color: #888884; font-size: 12px; }
+    .save-note::before { content: "↳"; font-size: 18px; color: var(--ink); }
+
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(15,15,15,.3); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; z-index: 5; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(470px, 100%); background: #fbfbfa; border-radius: 27px; box-shadow: 0 30px 90px rgba(0,0,0,.22); padding: 28px; animation: pop .25s ease both; }
+    @keyframes pop { from { opacity: 0; transform: scale(.97) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal h3 { margin: 0; font-size: 21px; letter-spacing: -.04em; }
+    .modal p { color: var(--muted); line-height: 1.7; font-size: 13px; margin: 9px 0 20px; }
+    .file-drop { display: block; width: 100%; border: 1px dashed #bcbcb8; border-radius: 19px; padding: 22px; text-align: center; color: #858581; font-size: 13px; cursor: pointer; transition: background .2s, border .2s; }
+    .file-drop:hover { background: #f2f2f0; border-color: var(--ink); }
+    .file-drop strong { display: block; color: var(--ink); margin-bottom: 5px; }
+    .file-list { display: grid; gap: 6px; margin-top: 11px; }
+    .file-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #666; background: #f0f0ee; border-radius: 10px; padding: 8px 10px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 23px; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; padding: 11px 17px; color: #fff; background: var(--ink); border-radius: 99px; font-size: 12px; transition: all .25s; z-index: 10; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 800px) {
+      .app { width: min(100% - 24px, 620px); padding-top: 22px; }
+      .layout { grid-template-columns: 1fr; }
+      .main-panel { min-height: 570px; padding: 28px 23px; }
+      .side-panel { position: static; padding: 23px; }
+      .story-input { min-height: 180px; margin-top: 34px; }
+      .question { font-size: 38px; }
+      .topbar { margin-bottom: 20px; }
+    }
+    @media (max-width: 440px) {
+      .date-chip { display: none; }
+      .actions { align-items: stretch; flex-direction: column-reverse; }
+      .primary, .secondary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">♟</span><span>DAILY / PENGUIN</span></div>
+      <div class="date-chip" id="today"></div>
+    </header>
+
+    <div class="layout">
+      <section class="panel main-panel">
+        <div class="step active" id="step-one">
+          <div class="eyebrow">01 / 今日意图</div>
+          <h1 class="question">亲爱的企鹅，<br><em>你今天的计划是什么？</em></h1>
+          <p class="subcopy">先写下此刻脑海里最想完成的事。不用太具体，给今天一个方向就好。</p>
+          <textarea id="story" class="story-input" placeholder="例如：想专注工作，也留一点时间给自己……" maxlength="240"></textarea>
+          <div class="actions"><span class="hint">可以随时回来修改</span><button class="primary" id="to-step-two">继续，写下细节 <span>→</span></button></div>
+        </div>
+
+        <div class="step" id="step-two">
+          <div class="eyebrow">02 / 具体事项</div>
+          <h1 class="question">请你写下<br><em>具体事项吧。</em></h1>
+          <p class="subcopy">把大方向拆成几个小组，每一件小事都值得被认真完成。</p>
+          <div id="group-builder" class="group-builder"></div>
+          <div class="actions"><button class="secondary" id="back-step-one">← 返回上一步</button><button class="primary" id="finish-plan">完成今日计划 ✓</button></div>
+        </div>
+      </section>
+
+      <aside class="panel side-panel">
+        <div class="side-title"><div><div class="eyebrow" style="margin-bottom:8px">TODAY / 记录</div><h2>今日清单</h2></div><span id="task-total">0 件事项</span></div>
+        <div class="progress-wrap"><div class="progress-label"><strong id="progress-number">0%</strong><span>完成进度</span></div><div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div></div>
+        <div id="plan-summary" class="plan-summary"><div class="summary-empty">完成第二步后，<br>你的今日清单会出现在这里。</div></div>
+        <div class="save-note">每次勾选都会自动保存到本地</div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="modal-backdrop" id="note-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <h3 id="modal-title">给这件完成的小事留个备注</h3>
+      <p>可以附上一张截图、一个文件，或者写下当下的心情。</p>
+      <label class="file-drop" for="file-input"><strong>＋ 添加文件</strong><span>支持图片、文档等任意格式</span></label>
+      <input id="file-input" type="file" multiple hidden />
+      <div id="file-list" class="file-list"></div>
+      <div class="modal-actions"><button class="secondary" id="skip-note">暂时不要</button><button class="primary" id="save-note">保存备注</button></div>
+    </div>
+  </div>
+  <div class="toast" id="toast">已保存</div>
+
+  <script>
+    const STORAGE_KEY = 'penguin-daily-plan-v1';
+    const $ = (id) => document.getElementById(id);
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {
+      story: '', groups: [{ name: '今天要做的事', tasks: [{ text: '', done: false, files: [] }] }]
+    };
+    let pendingTask = null;
+
+    const persist = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const toast = (message) => { $('toast').textContent = message; $('toast').classList.add('show'); setTimeout(() => $('toast').classList.remove('show'), 1800); };
+
+    const renderGroups = () => {
+      const wrap = $('group-builder'); wrap.innerHTML = '';
+      state.groups.forEach((group, gi) => {
+        const box = document.createElement('div'); box.className = 'group';
+        box.innerHTML = `<div class="group-head"><span style="color:#aaa;font-size:12px">${String(gi + 1).padStart(2, '0')}</span><input class="group-name" placeholder="例如：工作 / 生活 / 自我" value="${escapeHtml(group.name)}" aria-label="事项组名称"><button class="icon-button delete-group" title="删除事项组" aria-label="删除事项组">×</button></div><div class="tasks"></div><button class="add-task">＋ 添加一件小事</button>`;
+        const taskBox = box.querySelector('.tasks');
+        group.tasks.forEach((task, ti) => {
+          const row = document.createElement('div'); row.className = 'task-row' + (task.done ? ' done' : '');
+          row.innerHTML = `<input class="check" type="checkbox" ${task.done ? 'checked' : ''} aria-label="完成事项"><input class="task-input" placeholder="写下一件具体的小事" value="${escapeHtml(task.text)}">${task.files?.length ? '<span class="task-note" title="已添加备注文件">📎 ' + task.files.length + '</span>' : ''}<button class="icon-button delete-task" title="删除事项" aria-label="删除事项">×</button>`;
+          row.querySelector('.check').addEventListener('change', (e) => toggleTask(gi, ti, e.target.checked, row));
+          row.querySelector('.task-input').addEventListener('input', (e) => { state.groups[gi].tasks[ti].text = e.target.value; persist(); updateSummary(); });
+          row.querySelector('.delete-task').addEventListener('click', () => { group.tasks.splice(ti, 1); if (!group.tasks.length) group.tasks.push({ text: '', done: false, files: [] }); persist(); renderGroups(); updateSummary(); });
+          taskBox.appendChild(row);
+        });
+        box.querySelector('.group-name').addEventListener('input', (e) => { state.groups[gi].name = e.target.value; persist(); updateSummary(); });
+        box.querySelector('.delete-group').addEventListener('click', () => { if (state.groups.length === 1) return toast('至少保留一个事项组'); state.groups.splice(gi, 1); persist(); renderGroups(); updateSummary(); });
+        box.querySelector('.add-task').addEventListener('click', () => { group.tasks.push({ text: '', done: false, files: [] }); persist(); renderGroups(); updateSummary(); setTimeout(() => wrap.lastElementChild.querySelector('.task-input:last-of-type')?.focus(), 0); });
+        wrap.appendChild(box);
+      });
+      const add = document.createElement('button'); add.className = 'add-group'; add.textContent = '＋ 新增一个事项组'; add.addEventListener('click', () => { state.groups.push({ name: '', tasks: [{ text: '', done: false, files: [] }] }); persist(); renderGroups(); updateSummary(); }); wrap.appendChild(add);
+    };
+
+    const escapeHtml = (value = '') => value.replace(/[&<>'"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
+    const toggleTask = (gi, ti, checked, row) => { state.groups[gi].tasks[ti].done = checked; row.classList.toggle('done', checked); persist(); updateSummary(); if (checked) openNote(gi, ti); };
+    const updateSummary = () => {
+      let total = 0, done = 0; const box = $('plan-summary'); box.innerHTML = '';
+      state.groups.forEach((group) => {
+        const visible = group.tasks.filter(t => t.text.trim()); if (!visible.length) return;
+        const g = document.createElement('div'); g.className = 'summary-group'; const finished = visible.filter(t => t.done).length; total += visible.length; done += finished;
+        g.innerHTML = `<div class="summary-group-name"><span>${escapeHtml(group.name || '未命名事项组')}</span><span class="summary-count">${finished}/${visible.length}</span></div>`;
+        visible.forEach(task => { const t = document.createElement('div'); t.className = 'summary-task' + (task.done ? ' done' : ''); t.textContent = task.text; g.appendChild(t); }); box.appendChild(g);
+      });
+      if (!box.children.length) box.innerHTML = '<div class="summary-empty">完成第二步后，<br>你的今日清单会出现在这里。</div>';
+      const pct = total ? Math.round(done / total * 100) : 0; $('progress-number').textContent = pct + '%'; $('progress-bar').style.width = pct + '%'; $('task-total').textContent = `${total} 件事项`;
+    };
+    const renderFileList = (files = []) => { $('file-list').innerHTML = files.map(name => `<div class="file-item">◌ ${escapeHtml(name)}</div>`).join(''); };
+    const openNote = (gi, ti) => { pendingTask = { gi, ti }; $('file-input').value = ''; renderFileList(state.groups[gi].tasks[ti].files || []); $('note-modal').classList.add('open'); };
+    const closeNote = () => { $('note-modal').classList.remove('open'); pendingTask = null; };
+
+    $('story').value = state.story;
+    $('story').addEventListener('input', (e) => { state.story = e.target.value; persist(); });
+    $('to-step-two').addEventListener('click', () => { state.story = $('story').value.trim(); persist(); $('step-one').classList.remove('active'); $('step-two').classList.add('active'); renderGroups(); });
+    $('back-step-one').addEventListener('click', () => { $('step-two').classList.remove('active'); $('step-one').classList.add('active'); });
+    $('finish-plan').addEventListener('click', () => { persist(); toast('今日计划已保存'); updateSummary(); });
+    $('skip-note').addEventListener('click', closeNote);
+    $('save-note').addEventListener('click', () => {
+      if (pendingTask) {
+        const task = state.groups[pendingTask.gi].tasks[pendingTask.ti];
+        const selected = [...$('file-input').files].map(file => file.name);
+        task.files = [...new Set([...(task.files || []), ...selected])];
+        persist();
+        renderGroups();
+        updateSummary();
+      }
+      closeNote();
+      toast('完成记录已保存');
+    });
+    $('file-input').addEventListener('change', (e) => {
+      const existing = pendingTask ? (state.groups[pendingTask.gi].tasks[pendingTask.ti].files || []) : [];
+      renderFileList([...new Set([...existing, ...[...e.target.files].map(file => file.name)])]);
+    });
+    $('note-modal').addEventListener('click', (e) => { if (e.target === $('note-modal')) closeNote(); });
+    $('today').textContent = new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date());
+    updateSummary();
+    if (state.story && state.groups.some(g => g.tasks.some(t => t.text))) { $('step-one').classList.remove('active'); $('step-two').classList.add('active'); renderGroups(); }
+  </script>
+</body>
+</html>
