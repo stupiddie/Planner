@@ -49,6 +49,11 @@
     .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 34px; }
     .brand { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; letter-spacing: .08em; }
     .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; color: white; background: var(--ink); font-size: 17px; transform: rotate(-5deg); box-shadow: 0 5px 15px rgba(0,0,0,.15); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .history-actions { display: flex; align-items: center; gap: 5px; }
+    .history-button { border: 1px solid var(--line); border-radius: 99px; color: #777773; background: rgba(255,255,255,.5); padding: 8px 11px; font-size: 12px; transition: background .2s, color .2s, border .2s; }
+    .history-button:hover:not(:disabled) { color: var(--ink); border-color: #bdbdb9; background: #fff; }
+    .history-button:disabled { color: #b8b8b4; background: rgba(255,255,255,.3); cursor: not-allowed; }
     .date-chip { color: var(--muted); font-size: 13px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 99px; background: rgba(255,255,255,.5); }
 
     .layout { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(330px, .94fr); gap: 22px; align-items: start; }
@@ -72,12 +77,16 @@
     .secondary:hover { background: #fff; }
 
     .group-builder { margin-top: 35px; display: flex; flex-direction: column; gap: 13px; }
-    .group { border: 1px solid var(--line); background: rgba(255,255,255,.6); border-radius: var(--radius-lg); padding: 17px; }
-    .group-head { display: flex; align-items: center; gap: 9px; }
+    .group { position: relative; border: 1px solid var(--line); background: rgba(255,255,255,.6); border-radius: var(--radius-lg); padding: 17px; }
+    .group-head { position: relative; display: flex; align-items: center; gap: 9px; }
     .group-head input { flex: 1; min-width: 0; border: 0; outline: 0; font-weight: 700; font-size: 16px; background: transparent; color: var(--ink); }
     .group-head input::placeholder { color: #b7b7b3; }
-    .icon-button { width: 28px; height: 28px; border: 0; border-radius: 50%; background: #ededeb; color: #727270; display: grid; place-items: center; font-size: 18px; line-height: 1; transition: background .2s; }
-    .icon-button:hover { background: #dededb; color: var(--ink); }
+    .group-menu-toggle { width: 28px; height: 28px; border: 0; border-radius: 9px; color: #777773; background: transparent; display: grid; place-items: center; font-size: 21px; line-height: 1; letter-spacing: 2px; padding: 0 0 7px 2px; transition: background .2s, color .2s; }
+    .group-menu-toggle:hover, .group.menu-open .group-menu-toggle { color: var(--ink); background: #ededeb; }
+    .group-menu { display: none; position: absolute; z-index: 3; top: 50px; right: 17px; width: 150px; padding: 6px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.97); box-shadow: 0 15px 35px rgba(20,20,20,.12); }
+    .group.menu-open .group-menu { display: grid; gap: 2px; }
+    .group-menu button { border: 0; border-radius: 9px; background: transparent; color: #696966; text-align: left; padding: 9px 10px; font-size: 12px; }
+    .group-menu button:hover { color: var(--ink); background: #f0f0ee; }
     .tasks { display: grid; gap: 8px; margin-top: 15px; }
     .task-row { display: flex; align-items: center; gap: 9px; min-height: 32px; }
     .check { appearance: none; width: 20px; height: 20px; margin: 0; border: 1.5px solid #bcbcb8; border-radius: 7px; background: #fff; flex: 0 0 auto; position: relative; transition: all .2s; }
@@ -87,6 +96,9 @@
     .task-input:focus { border-bottom-color: var(--line); }
     .task-row.done .task-input { color: #a0a09c; text-decoration: line-through; }
     .task-note { color: #858581; font-size: 11px; white-space: nowrap; }
+    .delete-task { display: none; border: 0; width: auto; height: auto; padding: 0 2px; color: #989894; background: transparent; font-size: 18px; line-height: 1; }
+    .delete-task:hover { color: var(--ink); }
+    .group.manage-mode .delete-task { display: inline-grid; }
     .add-task { margin-top: 13px; border: 0; background: none; color: #888884; font-size: 12px; padding: 4px 0; text-align: left; }
     .add-task:hover { color: var(--ink); }
     .add-group { margin-top: 2px; border: 1px dashed #bdbdb9; color: #696966; background: transparent; border-radius: var(--radius-lg); padding: 16px; width: 100%; font-size: 13px; transition: border .2s, background .2s; }
@@ -108,10 +120,17 @@
     .summary-group:last-child { border-bottom: 0; }
     .summary-group-name { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; }
     .summary-count { color: var(--muted); font-size: 11px; font-weight: 500; }
-    .summary-task { color: #6d6d69; font-size: 12px; line-height: 1.7; margin: 7px 0 0; display: flex; gap: 7px; }
+    .summary-task-row { display: block; margin-top: 7px; }
+    .summary-task { flex: 1; min-width: 0; color: #6d6d69; font-size: 12px; line-height: 1.7; display: flex; gap: 7px; }
     .summary-task::before { content: "·"; color: #aaa; }
     .summary-task.done { color: #b2b2ae; text-decoration: line-through; }
     .summary-task.done::before { content: "✓"; color: var(--ink); }
+    .summary-note { margin: 5px 0 0 18px; color: #8a8a86; font-size: 11px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; cursor: pointer; }
+    .summary-note:hover { color: var(--ink); }
+    .summary-files { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0 0 18px; }
+    .summary-file { width: 25px; height: 25px; border: 0; border-radius: 50%; color: #777773; background: #ededeb; display: grid; place-items: center; font-size: 12px; cursor: pointer; }
+    .summary-file:hover { color: #fff; background: var(--ink); }
+    .summary-file:disabled { color: #aaa; background: #e2e2df; cursor: help; }
     .save-note { display: flex; gap: 9px; align-items: center; border-top: 1px solid #ecece9; margin-top: 22px; padding-top: 20px; color: #888884; font-size: 12px; }
     .save-note::before { content: "↳"; font-size: 18px; color: var(--ink); }
 
@@ -121,11 +140,19 @@
     @keyframes pop { from { opacity: 0; transform: scale(.97) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     .modal h3 { margin: 0; font-size: 21px; letter-spacing: -.04em; }
     .modal p { color: var(--muted); line-height: 1.7; font-size: 13px; margin: 9px 0 20px; }
-    .file-drop { display: block; width: 100%; border: 1px dashed #bcbcb8; border-radius: 19px; padding: 22px; text-align: center; color: #858581; font-size: 13px; cursor: pointer; transition: background .2s, border .2s; }
-    .file-drop:hover { background: #f2f2f0; border-color: var(--ink); }
-    .file-drop strong { display: block; color: var(--ink); margin-bottom: 5px; }
-    .file-list { display: grid; gap: 6px; margin-top: 11px; }
-    .file-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #666; background: #f0f0ee; border-radius: 10px; padding: 8px 10px; }
+    .note-textarea { display: block; width: 100%; min-height: 104px; resize: vertical; border: 1px solid var(--line); border-radius: 17px; outline: 0; padding: 13px 15px; color: var(--ink); background: #f7f7f5; line-height: 1.65; font-size: 13px; margin-bottom: 12px; }
+    .note-textarea:focus { border-color: var(--ink); background: #fff; }
+    .note-textarea::placeholder { color: #aaa9a5; }
+    .file-tools { display: flex; align-items: center; gap: 8px; min-height: 30px; }
+    .file-drop { width: 30px; height: 30px; border: 1px solid #c7c7c3; border-radius: 50%; display: grid; place-items: center; color: #777773; background: #f0f0ee; font-size: 17px; line-height: 1; cursor: pointer; transition: background .2s, border .2s, color .2s; }
+    .file-drop:hover { color: #fff; background: var(--ink); border-color: var(--ink); }
+    .file-drop strong { display: block; font-weight: 400; transform: translateY(-1px); }
+    .file-list { display: flex; flex-wrap: wrap; gap: 7px; }
+    .file-item { display: inline-flex; }
+    .file-name { display: none; }
+    .file-open { width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; color: #777773; background: #ededeb; display: grid; place-items: center; font-size: 12px; cursor: pointer; }
+    .file-open:hover { color: #fff; background: var(--ink); }
+    .file-open:disabled { color: #aaa; background: #e2e2df; cursor: help; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 23px; }
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; padding: 11px 17px; color: #fff; background: var(--ink); border-radius: 99px; font-size: 12px; transition: all .25s; z-index: 10; }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -141,6 +168,9 @@
     }
     @media (max-width: 440px) {
       .date-chip { display: none; }
+      .history-button { width: 32px; height: 30px; padding: 0; font-size: 0; }
+      #undo-action::before { content: "↶"; font-size: 17px; }
+      #redo-action::before { content: "↷"; font-size: 17px; }
       .actions { align-items: stretch; flex-direction: column-reverse; }
       .primary, .secondary { width: 100%; }
     }
@@ -150,7 +180,13 @@
   <main class="app">
     <header class="topbar">
       <div class="brand"><span class="brand-mark">♟</span><span>DAILY / PENGUIN</span></div>
-      <div class="date-chip" id="today"></div>
+      <div class="topbar-right">
+        <div class="history-actions" aria-label="历史操作">
+          <button class="history-button" id="undo-action" disabled title="撤回上一步">↶ 撤回上一步</button>
+          <button class="history-button" id="redo-action" disabled title="回到下一步">↷ 回到下一步</button>
+        </div>
+        <div class="date-chip" id="today"></div>
+      </div>
     </header>
 
     <div class="layout">
@@ -184,10 +220,13 @@
   <div class="modal-backdrop" id="note-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal">
       <h3 id="modal-title">给这件完成的小事留个备注</h3>
-      <p>可以附上一张截图、一个文件，或者写下当下的心情。</p>
-      <label class="file-drop" for="file-input"><strong>＋ 添加文件</strong><span>支持图片、文档等任意格式</span></label>
-      <input id="file-input" type="file" multiple hidden />
-      <div id="file-list" class="file-list"></div>
+      <p>先写下想记录的内容，再添加截图或任意文件。</p>
+      <textarea id="note-text" class="note-textarea" placeholder="在这里直接输入备注……" maxlength="2000"></textarea>
+      <div class="file-tools">
+        <label class="file-drop" for="file-input" title="添加文件"><strong>＋</strong></label>
+        <input id="file-input" type="file" multiple hidden />
+        <div id="file-list" class="file-list"></div>
+      </div>
       <div class="modal-actions"><button class="secondary" id="skip-note">暂时不要</button><button class="primary" id="save-note">保存备注</button></div>
     </div>
   </div>
@@ -197,69 +236,258 @@
     const STORAGE_KEY = 'penguin-daily-plan-v1';
     const $ = (id) => document.getElementById(id);
     let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || {
-      story: '', groups: [{ name: '今天要做的事', tasks: [{ text: '', done: false, files: [] }] }]
+      story: '', groups: [{ name: '今天要做的事', tasks: [{ text: '', done: false, note: '', files: [] }] }]
     };
+    state.groups = (state.groups || []).map(group => ({
+      name: group.name || '',
+      tasks: (group.tasks || []).map(task => ({
+        text: task.text || '',
+        done: Boolean(task.done),
+        note: task.note || '',
+        files: Array.isArray(task.files) ? task.files.map(file => typeof file === 'string' ? ({ id: '', name: file, type: '', size: 0 }) : ({
+          id: file.id || '', name: file.name || '未命名文件', type: file.type || '', size: Number(file.size) || 0
+        })) : []
+      }))
+    }));
+    if (!state.groups.length) state.groups = [{ name: '今天要做的事', tasks: [{ text: '', done: false, note: '', files: [] }] }];
     let pendingTask = null;
+    const HISTORY_LIMIT = 50;
+    let historyPast = [];
+    let historyFuture = [];
+    let editSnapshot = null;
 
     const persist = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     const toast = (message) => { $('toast').textContent = message; $('toast').classList.add('show'); setTimeout(() => $('toast').classList.remove('show'), 1800); };
+    const cloneState = (value = state) => JSON.parse(JSON.stringify(value));
+    const sameState = (left, right) => JSON.stringify(left) === JSON.stringify(right);
+    const updateHistoryControls = () => {
+      $('undo-action').disabled = historyPast.length === 0;
+      $('redo-action').disabled = historyFuture.length === 0;
+    };
+    const addHistorySnapshot = (snapshot) => {
+      historyPast.push(cloneState(snapshot));
+      if (historyPast.length > HISTORY_LIMIT) historyPast.shift();
+      historyFuture = [];
+      updateHistoryControls();
+    };
+    const commitEdit = () => {
+      if (!editSnapshot) return;
+      const snapshot = editSnapshot;
+      editSnapshot = null;
+      if (!sameState(snapshot, state)) addHistorySnapshot(snapshot);
+    };
+    const beginEdit = () => { if (!editSnapshot) editSnapshot = cloneState(); };
+    const recordHistory = () => { commitEdit(); addHistorySnapshot(state); };
+    const recordChangedHistory = (snapshot) => { commitEdit(); if (!sameState(snapshot, state)) addHistorySnapshot(snapshot); };
+    const restoreState = (snapshot) => {
+      state = cloneState(snapshot);
+      $('story').value = state.story;
+      persist();
+      renderGroups();
+      updateSummary();
+      closeNote();
+    };
+    const undo = () => {
+      commitEdit();
+      if (!historyPast.length) return;
+      historyFuture.push(cloneState());
+      restoreState(historyPast.pop());
+      updateHistoryControls();
+      toast('已撤回上一步');
+    };
+    const redo = () => {
+      commitEdit();
+      if (!historyFuture.length) return;
+      historyPast.push(cloneState());
+      restoreState(historyFuture.pop());
+      updateHistoryControls();
+      toast('已回到下一步');
+    };
+
+    const FILE_DB_NAME = 'penguin-daily-plan-files-v1';
+    const FILE_STORE = 'attachments';
+    const fileDb = new Promise((resolve, reject) => {
+      if (!window.indexedDB) return reject(new Error('当前浏览器不支持本地文件存储'));
+      const request = indexedDB.open(FILE_DB_NAME, 1);
+      request.onupgradeneeded = () => request.result.createObjectStore(FILE_STORE, { keyPath: 'id' });
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error('无法打开本地文件存储'));
+    });
+    const makeFileId = () => window.crypto?.randomUUID?.() || `file-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const saveAttachment = async (file) => {
+      const id = makeFileId();
+      const db = await fileDb;
+      await new Promise((resolve, reject) => {
+        const request = db.transaction(FILE_STORE, 'readwrite').objectStore(FILE_STORE).put({ id, name: file.name, type: file.type, size: file.size, blob: file });
+        request.onsuccess = resolve;
+        request.onerror = () => reject(request.error || new Error('文件保存失败'));
+      });
+      return { id, name: file.name, type: file.type, size: file.size };
+    };
+    const readAttachment = async (id) => {
+      const db = await fileDb;
+      return new Promise((resolve, reject) => {
+        const request = db.transaction(FILE_STORE, 'readonly').objectStore(FILE_STORE).get(id);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error('文件读取失败'));
+      });
+    };
+    const openStoredFile = async (file) => {
+      if (!file.id) return toast('这是旧版本保存的文件名，请重新添加原文件');
+      const popup = window.open('', '_blank');
+      if (!popup) return toast('浏览器阻止了打开新窗口，请允许弹窗后重试');
+      try {
+        const stored = await readAttachment(file.id);
+        if (!stored?.blob) throw new Error('找不到文件内容');
+        const url = URL.createObjectURL(stored.blob);
+        popup.location.href = url;
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } catch (error) {
+        popup.close();
+        toast('文件内容已丢失，请重新添加原文件');
+      }
+    };
 
     const renderGroups = () => {
       const wrap = $('group-builder'); wrap.innerHTML = '';
       state.groups.forEach((group, gi) => {
         const box = document.createElement('div'); box.className = 'group';
-        box.innerHTML = `<div class="group-head"><span style="color:#aaa;font-size:12px">${String(gi + 1).padStart(2, '0')}</span><input class="group-name" placeholder="例如：工作 / 生活 / 自我" value="${escapeHtml(group.name)}" aria-label="事项组名称"><button class="icon-button delete-group" title="删除事项组" aria-label="删除事项组">×</button></div><div class="tasks"></div><button class="add-task">＋ 添加一件小事</button>`;
+        box.innerHTML = `<div class="group-head"><span style="color:#aaa;font-size:12px">${String(gi + 1).padStart(2, '0')}</span><input class="group-name" placeholder="例如：工作 / 生活 / 自我" value="${escapeHtml(group.name)}" aria-label="事项组名称"><button class="group-menu-toggle" title="更多操作" aria-label="更多操作">···</button></div><div class="group-menu"><button class="manage-tasks">显示删除操作</button><button class="delete-group">删除这个事项组</button></div><div class="tasks"></div><button class="add-task">＋ 添加一件小事</button>`;
         const taskBox = box.querySelector('.tasks');
         group.tasks.forEach((task, ti) => {
           const row = document.createElement('div'); row.className = 'task-row' + (task.done ? ' done' : '');
-          row.innerHTML = `<input class="check" type="checkbox" ${task.done ? 'checked' : ''} aria-label="完成事项"><input class="task-input" placeholder="写下一件具体的小事" value="${escapeHtml(task.text)}">${task.files?.length ? '<span class="task-note" title="已添加备注文件">📎 ' + task.files.length + '</span>' : ''}<button class="icon-button delete-task" title="删除事项" aria-label="删除事项">×</button>`;
+          const noteCount = (task.files || []).length;
+          const hasNote = Boolean((task.note || '').trim() || noteCount);
+          row.innerHTML = `<input class="check" type="checkbox" ${task.done ? 'checked' : ''} aria-label="完成事项"><input class="task-input" placeholder="写下一件具体的小事" value="${escapeHtml(task.text)}">${hasNote ? '<span class="task-note" title="已添加备注">✎</span>' : ''}<button class="delete-task" title="删除事项" aria-label="删除事项">×</button>`;
           row.querySelector('.check').addEventListener('change', (e) => toggleTask(gi, ti, e.target.checked, row));
+          row.querySelector('.task-input').addEventListener('focus', beginEdit);
           row.querySelector('.task-input').addEventListener('input', (e) => { state.groups[gi].tasks[ti].text = e.target.value; persist(); updateSummary(); });
-          row.querySelector('.delete-task').addEventListener('click', () => { group.tasks.splice(ti, 1); if (!group.tasks.length) group.tasks.push({ text: '', done: false, files: [] }); persist(); renderGroups(); updateSummary(); });
+          row.querySelector('.task-input').addEventListener('blur', commitEdit);
+          row.querySelector('.delete-task').addEventListener('click', () => { recordHistory(); group.tasks.splice(ti, 1); if (!group.tasks.length) group.tasks.push({ text: '', done: false, note: '', files: [] }); persist(); renderGroups(); updateSummary(); });
           taskBox.appendChild(row);
         });
+        box.querySelector('.group-name').addEventListener('focus', beginEdit);
         box.querySelector('.group-name').addEventListener('input', (e) => { state.groups[gi].name = e.target.value; persist(); updateSummary(); });
-        box.querySelector('.delete-group').addEventListener('click', () => { if (state.groups.length === 1) return toast('至少保留一个事项组'); state.groups.splice(gi, 1); persist(); renderGroups(); updateSummary(); });
-        box.querySelector('.add-task').addEventListener('click', () => { group.tasks.push({ text: '', done: false, files: [] }); persist(); renderGroups(); updateSummary(); setTimeout(() => wrap.lastElementChild.querySelector('.task-input:last-of-type')?.focus(), 0); });
+        box.querySelector('.group-name').addEventListener('blur', commitEdit);
+        box.querySelector('.group-menu-toggle').addEventListener('click', (e) => { e.stopPropagation(); document.querySelectorAll('.group.menu-open').forEach(openGroup => { if (openGroup !== box) openGroup.classList.remove('menu-open'); }); box.classList.toggle('menu-open'); });
+        box.querySelector('.manage-tasks').addEventListener('click', (event) => { box.classList.toggle('manage-mode'); event.currentTarget.textContent = box.classList.contains('manage-mode') ? '收起删除操作' : '显示删除操作'; box.classList.remove('menu-open'); });
+        box.querySelector('.delete-group').addEventListener('click', () => { if (state.groups.length === 1) return toast('至少保留一个事项组'); recordHistory(); state.groups.splice(gi, 1); persist(); renderGroups(); updateSummary(); });
+        box.querySelector('.add-task').addEventListener('click', () => { recordHistory(); group.tasks.push({ text: '', done: false, note: '', files: [] }); persist(); renderGroups(); updateSummary(); setTimeout(() => box.querySelector('.tasks .task-row:last-child .task-input')?.focus(), 0); });
         wrap.appendChild(box);
       });
-      const add = document.createElement('button'); add.className = 'add-group'; add.textContent = '＋ 新增一个事项组'; add.addEventListener('click', () => { state.groups.push({ name: '', tasks: [{ text: '', done: false, files: [] }] }); persist(); renderGroups(); updateSummary(); }); wrap.appendChild(add);
+      const add = document.createElement('button'); add.className = 'add-group'; add.textContent = '＋ 新增一个事项组'; add.addEventListener('click', () => { recordHistory(); state.groups.push({ name: '', tasks: [{ text: '', done: false, note: '', files: [] }] }); persist(); renderGroups(); updateSummary(); }); wrap.appendChild(add);
     };
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.group')) document.querySelectorAll('.group.menu-open').forEach(group => group.classList.remove('menu-open'));
+    });
 
     const escapeHtml = (value = '') => value.replace(/[&<>'"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
-    const toggleTask = (gi, ti, checked, row) => { state.groups[gi].tasks[ti].done = checked; row.classList.toggle('done', checked); persist(); updateSummary(); if (checked) openNote(gi, ti); };
+    const toggleTask = (gi, ti, checked, row) => { recordHistory(); state.groups[gi].tasks[ti].done = checked; row.classList.toggle('done', checked); persist(); updateSummary(); if (checked) openNote(gi, ti); };
     const updateSummary = () => {
       let total = 0, done = 0; const box = $('plan-summary'); box.innerHTML = '';
       state.groups.forEach((group) => {
         const visible = group.tasks.filter(t => t.text.trim()); if (!visible.length) return;
         const g = document.createElement('div'); g.className = 'summary-group'; const finished = visible.filter(t => t.done).length; total += visible.length; done += finished;
         g.innerHTML = `<div class="summary-group-name"><span>${escapeHtml(group.name || '未命名事项组')}</span><span class="summary-count">${finished}/${visible.length}</span></div>`;
-        visible.forEach(task => { const t = document.createElement('div'); t.className = 'summary-task' + (task.done ? ' done' : ''); t.textContent = task.text; g.appendChild(t); }); box.appendChild(g);
+        visible.forEach(task => {
+          const taskRow = document.createElement('div'); taskRow.className = 'summary-task-row';
+          const t = document.createElement('div'); t.className = 'summary-task' + (task.done ? ' done' : ''); t.textContent = task.text;
+          taskRow.append(t); g.appendChild(taskRow);
+          if ((task.note || '').trim()) {
+            const note = document.createElement('div'); note.className = 'summary-note'; note.textContent = `备注：${task.note.trim()}`; note.title = '点击查看或编辑备注';
+            note.addEventListener('click', () => openNoteByReference(task));
+            g.appendChild(note);
+          }
+          if ((task.files || []).length) {
+            const files = document.createElement('div'); files.className = 'summary-files';
+            (task.files || []).forEach(rawFile => {
+              const file = typeof rawFile === 'string' ? { id: '', name: rawFile } : rawFile;
+              const fileButton = document.createElement('button'); fileButton.className = 'summary-file'; fileButton.textContent = '●'; fileButton.title = file.name || '未命名文件'; fileButton.setAttribute('aria-label', `打开文件 ${file.name || '未命名文件'}`);
+              if (file.id) fileButton.addEventListener('click', () => openStoredFile(file));
+              else { fileButton.disabled = true; fileButton.title = `${file.name || '未命名文件'}（旧附件，请重新添加）`; }
+              files.appendChild(fileButton);
+            });
+            g.appendChild(files);
+          }
+        });
+        box.appendChild(g);
       });
       if (!box.children.length) box.innerHTML = '<div class="summary-empty">完成第二步后，<br>你的今日清单会出现在这里。</div>';
       const pct = total ? Math.round(done / total * 100) : 0; $('progress-number').textContent = pct + '%'; $('progress-bar').style.width = pct + '%'; $('task-total').textContent = `${total} 件事项`;
     };
-    const renderFileList = (files = []) => { $('file-list').innerHTML = files.map(name => `<div class="file-item">◌ ${escapeHtml(name)}</div>`).join(''); };
-    const openNote = (gi, ti) => { pendingTask = { gi, ti }; $('file-input').value = ''; renderFileList(state.groups[gi].tasks[ti].files || []); $('note-modal').classList.add('open'); };
+    const hasTaskNote = (task) => Boolean((task.note || '').trim() || (task.files || []).length);
+    const openNoteByReference = (task) => {
+      for (let gi = 0; gi < state.groups.length; gi += 1) {
+        const ti = state.groups[gi].tasks.indexOf(task);
+        if (ti !== -1) return openNote(gi, ti);
+      }
+    };
+    const renderFileList = (files = []) => {
+      const list = $('file-list'); list.innerHTML = '';
+      files.forEach(rawFile => {
+        const file = typeof rawFile === 'string' ? { id: '', name: rawFile } : rawFile;
+        const item = document.createElement('div'); item.className = 'file-item';
+        const name = document.createElement('span'); name.className = 'file-name'; name.textContent = `◌ ${file.name || '未命名文件'}`;
+        const open = document.createElement('button'); open.className = 'file-open'; open.textContent = '●'; open.title = file.id ? `打开 ${file.name || '未命名文件'}` : `${file.name || '未命名文件'}（旧附件，请重新添加）`; open.setAttribute('aria-label', open.title); open.disabled = !file.id;
+        if (file.id) open.addEventListener('click', () => openStoredFile(file));
+        item.append(name, open); list.appendChild(item);
+      });
+    };
+    const openNote = (gi, ti) => {
+      pendingTask = { gi, ti };
+      const task = state.groups[gi].tasks[ti];
+      $('modal-title').textContent = hasTaskNote(task) ? '查看这件事的备注' : '给这件小事留个备注';
+      $('note-text').value = task.note || '';
+      $('file-input').value = '';
+      renderFileList(task.files || []);
+      $('note-modal').classList.add('open');
+      setTimeout(() => $('note-text').focus(), 0);
+    };
     const closeNote = () => { $('note-modal').classList.remove('open'); pendingTask = null; };
 
     $('story').value = state.story;
+    $('story').addEventListener('focus', beginEdit);
     $('story').addEventListener('input', (e) => { state.story = e.target.value; persist(); });
-    $('to-step-two').addEventListener('click', () => { state.story = $('story').value.trim(); persist(); $('step-one').classList.remove('active'); $('step-two').classList.add('active'); renderGroups(); });
+    $('story').addEventListener('blur', commitEdit);
+    $('to-step-two').addEventListener('click', () => { commitEdit(); state.story = $('story').value.trim(); persist(); $('step-one').classList.remove('active'); $('step-two').classList.add('active'); renderGroups(); });
     $('back-step-one').addEventListener('click', () => { $('step-two').classList.remove('active'); $('step-one').classList.add('active'); });
     $('finish-plan').addEventListener('click', () => { persist(); toast('今日计划已保存'); updateSummary(); });
+    $('undo-action').addEventListener('click', undo);
+    $('redo-action').addEventListener('click', redo);
     $('skip-note').addEventListener('click', closeNote);
-    $('save-note').addEventListener('click', () => {
-      if (pendingTask) {
-        const task = state.groups[pendingTask.gi].tasks[pendingTask.ti];
-        const selected = [...$('file-input').files].map(file => file.name);
-        task.files = [...new Set([...(task.files || []), ...selected])];
-        persist();
-        renderGroups();
-        updateSummary();
+    $('save-note').addEventListener('click', async () => {
+      const saveButton = $('save-note');
+      saveButton.disabled = true;
+      saveButton.textContent = '保存中…';
+      let message = '完成记录已保存';
+      try {
+        if (pendingTask) {
+          const beforeNote = cloneState();
+          const task = state.groups[pendingTask.gi].tasks[pendingTask.ti];
+          task.note = $('note-text').value.trim();
+          const selected = [...$('file-input').files];
+          const storedFiles = [];
+          for (const file of selected) {
+            try { storedFiles.push(await saveAttachment(file)); }
+            catch (error) { message = '文字已保存，但部分文件保存失败'; }
+          }
+          const oldFiles = task.files || [];
+          const replacedNames = new Set(storedFiles.map(file => file.name));
+          const keptFiles = oldFiles
+            .map(file => typeof file === 'string' ? { id: '', name: file } : file)
+            .filter(file => file.id || !replacedNames.has(file.name));
+          task.files = [...keptFiles, ...storedFiles];
+          recordChangedHistory(beforeNote);
+          persist();
+          renderGroups();
+          updateSummary();
+        }
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = '保存备注';
+        closeNote();
       }
-      closeNote();
-      toast('完成记录已保存');
+      toast(message);
     });
     $('file-input').addEventListener('change', (e) => {
       const existing = pendingTask ? (state.groups[pendingTask.gi].tasks[pendingTask.ti].files || []) : [];
@@ -268,6 +496,7 @@
     $('note-modal').addEventListener('click', (e) => { if (e.target === $('note-modal')) closeNote(); });
     $('today').textContent = new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date());
     updateSummary();
+    updateHistoryControls();
     if (state.story && state.groups.some(g => g.tasks.some(t => t.text))) { $('step-one').classList.remove('active'); $('step-two').classList.add('active'); renderGroups(); }
   </script>
 </body>
