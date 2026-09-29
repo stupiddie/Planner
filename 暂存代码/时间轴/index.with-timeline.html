@@ -82,7 +82,7 @@
     .secondary:hover { background: #fff; }
 
     .task-builder { margin-top: 35px; display: grid; gap: 10px; }
-    .task-combination { display: grid; gap: 6px; padding: 15px 17px; border: 1px solid #d7d7d3; border-radius: var(--radius-lg); background: var(--gray-surface); }
+    .task-combination { display: grid; gap: 6px; padding: 13px 15px; border-left: 3px solid var(--ink); border-radius: 0 6px 6px 0; background: var(--gray-surface); }
     .combination-head { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
     .combination-name { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid transparent; outline: 0; padding: 5px 0; color: var(--ink); background: transparent; font: inherit; font-size: 13px; font-weight: 700; }
     .combination-name::placeholder { color: #9d9d99; font-weight: 500; }
@@ -109,7 +109,7 @@
     .merge-status { color: var(--muted); font-size: 12px; }
     .merge-button { border: 1px solid var(--line); border-radius: 6px; padding: 9px 13px; color: var(--ink); background: #fff; font-size: 12px; font-weight: 650; }
     .merge-button:disabled { color: #b3b3af; background: transparent; cursor: not-allowed; }
-    .add-task { margin-top: 10px; border: 1px dashed #bdbdb9; color: #696966; background: transparent; border-radius: var(--radius-lg); padding: 14px; width: 100%; font-size: 13px; transition: border .2s, background .2s; }
+    .add-task { margin-top: 10px; border: 1px dashed #bdbdb9; color: #696966; background: transparent; border-radius: 6px; padding: 14px; width: 100%; font-size: 13px; transition: border .2s, background .2s; }
     .add-task:hover { background: rgba(255,255,255,.75); border-color: var(--ink); }
 
     .side-panel { padding: 28px; position: sticky; top: 20px; }
@@ -124,8 +124,9 @@
     .progress-bar { width: 0%; height: 100%; border-radius: inherit; background: var(--ink); transition: width .35s ease; }
     .plan-summary { display: grid; gap: 10px; }
     .summary-empty { color: #a3a39f; font-size: 13px; line-height: 1.7; padding: 17px 2px; }
-    .summary-group { padding: 16px 17px 9px; border: 1px solid #d7d7d3; border-radius: var(--radius-lg); background: var(--gray-surface); }
-    .summary-group.standalone { padding: 5px 0; border: 0; border-radius: 0; background: transparent; }
+    .summary-group { padding: 14px 0 3px; border-bottom: 1px solid #ecece9; }
+    .summary-group:last-child { border-bottom: 0; }
+    .summary-group.standalone { padding-top: 5px; }
     .summary-group.standalone .summary-task-row { margin-top: 0; }
     .summary-group-name { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; }
     .summary-count { color: var(--muted); font-size: 11px; font-weight: 500; }
@@ -197,6 +198,49 @@
     .checklist-panel .summary-task-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; }
     .checklist-panel .summary-task { margin-top: 0; }
     .checklist-panel .summary-note, .checklist-panel .summary-files { margin-left: 26px; }
+    .timeline-section { margin-top: 35px; padding-top: 28px; border-top: 1px solid var(--line); }
+    .timeline-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .timeline-heading .eyebrow { margin-bottom: 8px; }
+    .timeline-heading h2 { margin: 0; font-size: 22px; letter-spacing: -.04em; }
+    .timeline-help { margin: 9px 0 16px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .timeline-grid { --hour-height: 58px; position: relative; min-height: 48px; border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; background: var(--gray-surface); }
+    .timeline-row { display: grid; grid-template-columns: 72px minmax(0, 1fr); height: var(--hour-height); border-bottom: 1px solid rgba(190,190,186,.48); }
+    .timeline-row:last-child { border-bottom: 0; }
+    .timeline-time { display: flex; align-items: flex-start; justify-content: flex-end; padding: 10px 13px 0 8px; color: var(--ink); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .timeline-lane { min-width: 0; border-left: 1px solid rgba(190,190,186,.65); background-image: linear-gradient(to right, rgba(190,190,186,.33) 1px, transparent 1px), linear-gradient(to bottom, rgba(190,190,186,.33) 1px, transparent 1px); background-size: 28px 28px; }
+    .timeline-events { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+    .timeline-event { position: absolute; left: 94px; right: 16px; min-height: 44px; padding: 9px 12px 8px 14px; border: 1px solid var(--line); border-left: 3px solid #aaa; border-radius: 0; background: #fff; pointer-events: auto; }
+    .timeline-event-time { margin-bottom: 3px; color: var(--ink); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .timeline-event-text { display: block; width: calc(100% - 88px); min-height: 27px; resize: none; border: 0; outline: 0; color: var(--ink); background: transparent; font: inherit; font-size: 13px; line-height: 1.45; }
+    .timeline-event-text::placeholder { color: var(--muted); }
+    .timeline-event-actions { position: absolute; top: 7px; right: 8px; display: flex; gap: 7px; }
+    .timeline-event-action { border: 0; padding: 2px 0; color: var(--muted); background: transparent; font-size: 16px; line-height: 1; cursor: pointer; }
+    .timeline-event-action:hover { color: var(--ink); }
+    .timeline-palette-wrap { position: relative; display: inline-flex; }
+    .timeline-palette-button { display: inline-grid; place-items: center; width: 19px; height: 19px; padding: 0; border: 0; color: var(--muted); background: transparent; cursor: pointer; }
+    .timeline-palette-button:hover { color: var(--ink); }
+    .palette-icon { position: relative; display: block; width: 16px; height: 13px; transform: rotate(-9deg); border: 1.5px solid currentColor; border-radius: 62% 45% 55% 43%; }
+    .palette-icon::before { content: ''; position: absolute; top: 3px; left: 3px; width: 3px; height: 3px; border-radius: 50%; background: currentColor; box-shadow: 5px -1px 0 currentColor, 7px 4px 0 currentColor, 2px 6px 0 currentColor; }
+    .palette-icon::after { content: ''; position: absolute; right: -2px; bottom: -1px; width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+    .palette-menu { position: absolute; top: 24px; right: 0; z-index: 20; display: none; grid-template-columns: repeat(3, 20px); gap: 7px; padding: 9px; border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: 0 12px 28px rgba(0,0,0,.14); }
+    .timeline-palette-wrap.open .palette-menu { display: grid; }
+    .palette-swatch { width: 20px; height: 20px; padding: 0; border: 1px solid rgba(0,0,0,.16); border-radius: 3px; cursor: pointer; }
+    .palette-swatch.selected { box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--ink); }
+    .palette-custom { grid-column: 1 / -1; width: 100%; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 3px; background: #fff; cursor: pointer; }
+    .timeline-task-list { display: grid; gap: 9px; margin-top: 15px; }
+    .timeline-task { display: grid; grid-template-columns: auto auto auto minmax(180px, 1fr) auto auto auto; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 0; background: #fff; }
+    .timeline-task input[type="time"] { width: 92px; border: 1px solid var(--line); border-radius: 8px; padding: 7px 8px; color: var(--ink); background: #fff; color-scheme: light; font: inherit; font-size: 12px; }
+    .timeline-task-separator { color: var(--muted); font-size: 12px; }
+    .timeline-task-text { min-width: 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; outline: 0; padding: 7px 3px; color: var(--ink); background: transparent; font: inherit; font-size: 13px; }
+    .timeline-task-text:focus { border-color: var(--ink); }
+    .timeline-task-action { border: 0; padding: 4px 1px; color: var(--muted); background: transparent; font-size: 17px; line-height: 1; cursor: pointer; white-space: nowrap; }
+    .timeline-task-action:hover { color: var(--ink); }
+    .timeline-task .palette-menu { top: calc(100% + 8px); }
+    .timeline-add { width: 100%; margin-top: 10px; padding: 11px; border: 1px dashed #bcbcb8; border-radius: 8px; color: var(--muted); background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
+    .timeline-add:hover { border-color: var(--ink); color: var(--ink); }
+    .timeline-end { margin: 8px 12px 0 72px; color: var(--muted); font-size: 10px; text-align: right; }
+    @media (max-width: 600px) { .timeline-grid { --hour-height: 62px; } .timeline-event { left: 84px; right: 10px; } .timeline-task { grid-template-columns: auto auto auto minmax(120px, 1fr) auto auto auto; gap: 5px; padding: 8px; } .timeline-task input[type="time"] { width: 82px; } }
+
     .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(15,15,15,.3); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; z-index: 5; }
     .modal-backdrop.open { display: flex; }
     .modal { width: min(470px, 100%); background: #fbfbfa; border-radius: 27px; box-shadow: 0 30px 90px rgba(0,0,0,.22); padding: 28px; animation: pop .25s ease both; }
@@ -300,6 +344,14 @@
         <div class="progress-wrap"><div class="progress-label"><strong id="progress-number">0%</strong><span>完成进度</span></div><div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div></div>
         <div class="side-title"><h2>待完成事项</h2><span id="task-total">0 件事项</span></div>
         <div id="plan-summary" class="plan-summary checklist-summary"><div class="summary-empty">还没有具体事项。</div></div>
+        <section class="timeline-section" aria-labelledby="timeline-title">
+          <div class="timeline-heading"><div><div class="eyebrow">DAY / 时间轴</div><h2 id="timeline-title">一天的 24 小时</h2></div></div>
+          <p class="timeline-help" id="timeline-help">添加时间任务，选择分钟级的起止时间，然后写下行程。</p>
+          <div class="timeline-grid" id="timeline-grid" aria-label="0点到次日0点的时间轴"></div>
+          <div class="timeline-end">次日 0:00</div>
+          <div class="timeline-task-list" id="timeline-task-list"></div>
+          <button class="timeline-add" id="timeline-add" type="button">＋ 添加时间任务</button>
+        </section>
       </div>
     </section>
 
@@ -538,6 +590,7 @@
       updateDateChip();
       $('checklist-story').textContent = state.story.trim();
       updateSummary();
+      renderTimeline();
       updateHistoryControls();
     };
     const openSavedPlan = (plan) => {
@@ -606,6 +659,7 @@
       persist();
       renderTaskBuilder();
       updateSummary();
+      renderTimeline();
       closeNote();
     };
     const undo = () => {
@@ -735,7 +789,7 @@
         if (isCombination(group)) {
           const combination = document.createElement('section'); combination.className = 'task-combination';
           const head = document.createElement('div'); head.className = 'combination-head';
-          head.innerHTML = '<input class="combination-name" placeholder="名称（可选）" aria-label="组合名称"><button class="ungroup-tasks" type="button">拆分</button>';
+          head.innerHTML = '<span class="combination-label">组合</span><input class="combination-name" placeholder="组合名称（可选）" aria-label="组合名称"><button class="ungroup-tasks" type="button">拆散组合</button>';
           const name = head.querySelector('.combination-name'); name.value = group.name;
           name.addEventListener('focus', beginEdit);
           name.addEventListener('input', (event) => { group.name = event.target.value; persist(); updateSummary(); });
@@ -784,6 +838,7 @@
     };
     document.addEventListener('click', (event) => {
       if (!event.target.closest('.plan-card')) document.querySelectorAll('.plan-card.menu-open').forEach(card => card.classList.remove('menu-open'));
+      if (!event.target.closest('.timeline-palette-wrap')) document.querySelectorAll('.timeline-palette-wrap.open').forEach(palette => palette.classList.remove('open'));
     });
 
     const escapeHtml = (value = '') => value.replace(/[&<>'"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
@@ -800,7 +855,7 @@
         const visible = group.tasks.filter(t => t.text.trim()); if (!visible.length) return;
         const grouped = isCombination(group);
         const g = document.createElement('div'); g.className = `summary-group${grouped ? '' : ' standalone'}`; const finished = visible.filter(t => t.done).length; total += visible.length; done += finished;
-        g.innerHTML = grouped ? `<div class="summary-group-name"><span>${escapeHtml(group.name)}</span><span class="summary-count">${finished}/${visible.length}</span></div>` : '';
+        g.innerHTML = grouped ? `<div class="summary-group-name"><span>${escapeHtml(group.name || '事项组合')}</span><span class="summary-count">${finished}/${visible.length}</span></div>` : '';
         visible.forEach(task => {
           const taskRow = document.createElement('div'); taskRow.className = 'summary-task-row';
           const check = document.createElement('input'); check.type = 'checkbox'; check.className = 'check summary-check'; check.checked = task.done; check.setAttribute('aria-label', `完成事项：${task.text}`);
@@ -833,7 +888,6 @@
       if (!box.children.length) box.innerHTML = '<div class="summary-empty">还没有具体事项。</div>';
       const pct = total ? Math.round(done / total * 100) : 0; $('progress-number').textContent = pct + '%'; $('progress-bar').style.width = pct + '%'; $('task-total').textContent = `${total} 件事项`;
     };
-    /* 时间轴功能暂存于 暂存代码/时间轴/index.with-timeline.html，当前版本暂不启用。
     const makeTimelineId = () => window.crypto?.randomUUID?.() || `timeline-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const timelineMinuteLabel = (minutes) => {
       const hour = Math.floor(minutes / 60);
@@ -1023,7 +1077,6 @@
         list.appendChild(item);
       });
     };
-    */
     const hasTaskNote = (task) => Boolean((task.note || '').trim() || (task.files || []).length);
     const openNoteByReference = (task) => {
       for (let gi = 0; gi < state.groups.length; gi += 1) {
@@ -1098,6 +1151,14 @@
     $('edit-current-plan').addEventListener('click', () => showEditorView('details'));
     $('back-to-month').addEventListener('click', showMonthView);
     $('new-today-plan').addEventListener('click', startNewPlan);
+    $('timeline-add').addEventListener('click', () => {
+      recordHistory();
+      state.timeline.push({ id: makeTimelineId(), start: 540, end: 600, text: '', folded: false, color: TIMELINE_COLORS[0] });
+      persist();
+      syncArchivedPlan();
+      renderTimeline();
+      setTimeout(() => $('timeline-task-list .timeline-task:last-child .timeline-task-text')?.focus(), 0);
+    });
     $('undo-action').addEventListener('click', undo);
     $('redo-action').addEventListener('click', redo);
     $('skip-note').addEventListener('click', closeNote);
