@@ -90,33 +90,36 @@
     .ungroup-tasks { border: 0; padding: 4px 0; color: #858581; background: transparent; font-size: 11px; white-space: nowrap; }
     .ungroup-tasks:hover { color: var(--ink); }
     .task-row { display: flex; align-items: flex-start; gap: 10px; min-height: 39px; padding: 3px 0 4px; border-bottom: 1px solid var(--line); }
+    .task-row.dragging { opacity: .45; }
+    .task-row.drag-over { position: relative; }
+    .task-row.drag-over::before { content: ""; position: absolute; left: 0; right: 0; top: -4px; height: 2px; border-radius: 99px; background: var(--ink); }
+    .task-row.drag-over.drop-after::before { top: auto; bottom: -4px; }
+    .task-row.drag-merge { border-radius: var(--radius-md); background: var(--gray-surface); }
+    .task-builder.drag-over-end::after { content: ""; display: block; height: 2px; margin: 2px 0 0; border-radius: 99px; background: var(--ink); }
+    .task-drop-zone { display: none; min-height: 46px; border: 1px dashed #bdbdb9; border-radius: var(--radius-lg); background: rgba(255,255,255,.35); }
+    .task-builder.is-dragging .task-drop-zone { display: block; }
+    .task-drop-zone.drag-over { border-color: var(--ink); background: var(--gray-surface); }
     .task-builder > .task-row:last-of-type { border-bottom-color: transparent; }
     .task-combination .task-row { border-bottom-color: rgba(190,190,186,.55); }
     .task-combination .task-row:last-child { border-bottom-color: transparent; }
-    .merge-select { appearance: none; width: 20px; height: 20px; margin: 6px 0 0; border: 1.5px solid #aaa9a5; border-radius: 6px; background: #fff; flex: 0 0 auto; position: relative; transition: background .2s, border-color .2s; }
-    .merge-select:checked { background: var(--ink); border-color: var(--ink); }
-    .merge-select:checked::after { content: "✓"; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 700; }
-    .check { appearance: none; width: 20px; height: 20px; margin: 0; border: 1.5px solid #bcbcb8; border-radius: 7px; background: #fff; flex: 0 0 auto; position: relative; transition: all .2s; }
-    .check:checked { background: var(--ink); border-color: var(--ink); }
-    .check:checked::after { content: "✓"; color: #fff; position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+    .task-combination.drag-over-group { border-color: var(--ink); background: #e5e5e2; }
+    .task-drag-handle { flex: 0 0 auto; width: 18px; height: 28px; margin-top: 2px; border: 0; padding: 0; color: #aaa9a5; background: transparent; font-size: 15px; line-height: 1; letter-spacing: -3px; cursor: grab; }
+    .task-drag-handle:hover { color: var(--ink); }
+    .task-drag-handle:active { cursor: grabbing; }
     .task-input { flex: 1; min-width: 0; min-height: 32px; border: 0; outline: 0; border-bottom: 1px solid transparent; font-family: inherit; font-size: 14px; line-height: 1.55; background: transparent; color: var(--ink); padding: 5px 0; resize: none; overflow: hidden; white-space: pre-wrap; overflow-wrap: anywhere; }
     .task-input:focus { border-bottom-color: var(--line); }
     .task-row.done .task-input { color: #a0a09c; text-decoration: line-through; }
     .task-note { margin-top: 9px; color: #858581; font-size: 11px; white-space: nowrap; }
     .delete-task { border: 0; width: 24px; height: 28px; margin-top: 2px; padding: 0; color: #aaa9a5; background: transparent; font-size: 18px; line-height: 1; }
     .delete-task:hover { color: var(--ink); }
-    .merge-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 15px; min-height: 36px; }
-    .merge-status { color: var(--muted); font-size: 12px; }
-    .merge-button { border: 1px solid var(--line); border-radius: 6px; padding: 9px 13px; color: var(--ink); background: #fff; font-size: 12px; font-weight: 650; }
-    .merge-button:disabled { color: #b3b3af; background: transparent; cursor: not-allowed; }
     .add-task { margin-top: 10px; border: 1px dashed #bdbdb9; color: #696966; background: transparent; border-radius: var(--radius-lg); padding: 14px; width: 100%; font-size: 13px; transition: border .2s, background .2s; }
     .add-task:hover { background: rgba(255,255,255,.75); border-color: var(--ink); }
 
     .side-panel { padding: 28px; position: sticky; top: 20px; }
-    .side-title { display: flex; justify-content: space-between; align-items: start; margin-bottom: 23px; }
+    .side-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 23px; }
     .side-title h2 { font-size: 18px; margin: 0; letter-spacing: -.03em; }
     .side-title span { color: var(--muted); font-size: 12px; }
-    .progress-wrap { padding: 17px; border-radius: var(--radius-lg); background: var(--gray-surface); margin-bottom: 22px; }
+    .progress-wrap { padding: 17px; border: 0; border-radius: var(--radius-lg); background: var(--gray-surface); margin-bottom: 22px; }
     .progress-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 13px; }
     .progress-label strong { font-size: 30px; letter-spacing: -.06em; }
     .progress-label span { color: var(--muted); font-size: 12px; }
@@ -124,13 +127,17 @@
     .progress-bar { width: 0%; height: 100%; border-radius: inherit; background: var(--ink); transition: width .35s ease; }
     .plan-summary { display: grid; gap: 10px; }
     .summary-empty { color: #a3a39f; font-size: 13px; line-height: 1.7; padding: 17px 2px; }
-    .summary-group { padding: 16px 17px 9px; border: 1px solid #d7d7d3; border-radius: var(--radius-lg); background: var(--gray-surface); }
+    .summary-group { padding: 16px 17px; border: 0; border-radius: var(--radius-lg); background: var(--gray-surface); }
+    .summary-group.no-heading .summary-task-row:first-child { margin-top: 0; }
     .summary-group.standalone { padding: 5px 0; border: 0; border-radius: 0; background: transparent; }
     .summary-group.standalone .summary-task-row { margin-top: 0; }
     .summary-group-name { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; }
-    .summary-count { color: var(--muted); font-size: 11px; font-weight: 500; }
     .summary-task-row { display: block; margin-top: 7px; }
     .summary-task-line { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
+    .summary-task-line { cursor: pointer; }
+    .summary-task-line:hover .summary-task { color: var(--ink); }
+    .summary-group:not(.standalone) .summary-note { margin-left: 0; max-width: 100%; }
+    .summary-group:not(.standalone) .summary-files { margin-left: 0; }
     .summary-task { flex: 1; min-width: 0; color: #6d6d69; font-size: 12px; line-height: 1.7; display: flex; gap: 7px; }
     .summary-task::before { content: none; }
     .summary-task.done { color: #b2b2ae; text-decoration: line-through; }
@@ -188,12 +195,11 @@
     .checklist-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 22px; margin-bottom: 28px; }
     .checklist-header h1 { margin: 0; font-size: clamp(32px, 4.5vw, 50px); line-height: 1.1; letter-spacing: -.06em; }
     .checklist-intent-label { margin-top: 17px; color: var(--muted); font-size: 15px; font-weight: 700; letter-spacing: .08em; }
-    .checklist-intent { max-width: 620px; margin: 7px 0 0; padding: 15px 18px; border: 0; border-radius: var(--radius-md); color: var(--ink); background: var(--gray-surface); font-size: 15px; font-weight: 600; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .checklist-intent { max-width: 620px; margin: 7px 0 0; padding: 15px 18px; border: 0; border-radius: var(--radius-lg); color: var(--ink); background: var(--gray-surface); font-size: 15px; font-weight: 600; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
     .step-context { max-width: 650px; margin-top: 25px; padding: 15px 18px; border: 0; border-radius: var(--radius-md); background: var(--gray-surface); }
     .step-context-label { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; }
     .step-context-text { margin: 6px 0 0; color: var(--ink); font-size: 17px; font-weight: 650; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
     .checklist-summary { display: grid; gap: 10px; }
-    .summary-check { width: 18px; height: 18px; border-radius: 6px; margin-top: 2px; }
     .checklist-panel .summary-task-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; }
     .checklist-panel .summary-task { margin-top: 0; }
     .checklist-panel .summary-note, .checklist-panel .summary-files { margin-left: 26px; }
@@ -275,10 +281,9 @@
         <div class="step" id="step-two">
           <div class="eyebrow">02 / 具体事项</div>
           <h1 class="question">接下来写下<br><em>今天要完成的具体任务</em></h1>
-          <p class="subcopy">先把任务一件件写下来，需要时勾选多件合并成组合。</p>
+          <p class="subcopy">先把任务一件件写下来，把任务拖到一起即可合并，也可以随时调整顺序。</p>
           <div class="step-context"><div class="step-context-label">今日大致计划</div><p class="step-context-text" id="step-two-story"></p></div>
           <div id="task-builder" class="task-builder"></div>
-          <div class="merge-tools"><span class="merge-status" id="merge-status">选择至少两件任务即可合并</span><button class="merge-button" id="merge-selected" type="button" disabled>合并为组合</button></div>
           <button class="add-task" id="add-task" type="button">＋ 新增一个事项</button>
           <div class="actions"><button class="secondary" id="back-step-one">← 返回上一步</button><button class="primary" id="finish-plan">写好了 ✓</button></div>
         </div>
@@ -298,7 +303,7 @@
           <button class="secondary" id="edit-current-plan">编辑事项</button>
         </div>
         <div class="progress-wrap"><div class="progress-label"><strong id="progress-number">0%</strong><span>完成进度</span></div><div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div></div>
-        <div class="side-title"><h2>待完成事项</h2><span id="task-total">0 件事项</span></div>
+        <div class="side-title"><h2>待完成事项</h2><span id="task-total">0/0</span></div>
         <div id="plan-summary" class="plan-summary checklist-summary"><div class="summary-empty">还没有具体事项。</div></div>
       </div>
     </section>
@@ -399,7 +404,6 @@
     let historyFuture = [];
     let editSnapshot = null;
     let newPlanMode = false;
-    let selectedTasks = new Set();
     const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
 
     const persist = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -542,7 +546,6 @@
     };
     const openSavedPlan = (plan) => {
       newPlanMode = false;
-      selectedTasks.clear();
       state = normalizePlanState(plan, plan.date);
       activeDate = state.date;
       persist();
@@ -550,7 +553,6 @@
     };
     const openSavedPlanForEdit = (plan) => {
       newPlanMode = false;
-      selectedTasks.clear();
       state = normalizePlanState(plan, plan.date);
       activeDate = state.date;
       persist();
@@ -558,7 +560,6 @@
     };
     const startNewPlan = () => {
       newPlanMode = true;
-      selectedTasks.clear();
       activeDate = todayKey;
       state = blankState(todayKey);
       persist();
@@ -569,7 +570,6 @@
       if (!date || date === activeDate) return;
       commitEdit();
       activeDate = date;
-      selectedTasks.clear();
       const existing = newPlanMode ? null : savedPlans.find(plan => plan.date === date);
       state = existing ? normalizePlanState(existing, date) : blankState(date);
       persist();
@@ -596,7 +596,6 @@
     const recordChangedHistory = (snapshot) => { commitEdit(); if (!sameState(snapshot, state)) addHistorySnapshot(snapshot); };
     const restoreState = (snapshot) => {
       state = cloneState(snapshot);
-      selectedTasks.clear();
       activeDate = state.date || activeDate;
       $('story').value = state.story;
       $('step-two-story').textContent = state.story.trim() || '还没有写下大致计划。';
@@ -681,35 +680,152 @@
       }
       return null;
     };
-    const updateMergeControls = () => {
-      const valid = [...selectedTasks].filter(task => task.text.trim() && locateTask(task));
-      selectedTasks = new Set(valid);
-      const count = valid.length;
-      $('merge-selected').disabled = count < 2;
-      $('merge-status').textContent = count ? `已选择 ${count} 件任务` : '选择至少两件任务即可合并';
+    let draggedTask = null;
+    const clearDragIndicators = () => {
+      document.querySelectorAll('.task-row.drag-over, .task-row.drag-merge, .task-combination.drag-over-group, .task-row.dragging, .task-builder.drag-over-end').forEach(element => element.classList.remove('drag-over', 'drop-after', 'drag-merge', 'drag-over-group', 'dragging', 'drag-over-end'));
     };
+    const finishTaskDrag = () => {
+      draggedTask = null;
+      $('task-builder')?.classList.remove('is-dragging');
+      clearDragIndicators();
+    };
+    const isStandaloneTask = (task) => {
+      const location = locateTask(task);
+      return Boolean(location && state.groups[location.gi].tasks.length === 1 && !state.groups[location.gi].name.trim());
+    };
+    const combineStandaloneTasks = (task, targetTask) => {
+      const source = locateTask(task);
+      const target = locateTask(targetTask);
+      if (!source || !target || task === targetTask || !isStandaloneTask(task) || !isStandaloneTask(targetTask)) return false;
+      const firstIndex = Math.min(source.gi, target.gi);
+      const firstTask = source.gi < target.gi ? task : targetTask;
+      const secondTask = source.gi < target.gi ? targetTask : task;
+      state.groups = state.groups.filter((group, index) => index !== source.gi && index !== target.gi);
+      state.groups.splice(firstIndex, 0, { name: '', tasks: [firstTask, secondTask] });
+      return true;
+    };
+    const moveDraggedTask = (task, targetTask, after = false) => {
+      const source = locateTask(task);
+      const target = locateTask(targetTask);
+      if (!source || !target || task === targetTask) return false;
+      const sourceGroup = state.groups[source.gi];
+      const targetGroup = state.groups[target.gi];
+
+      if (source.gi === target.gi) {
+        sourceGroup.tasks.splice(source.ti, 1);
+        const targetIndex = sourceGroup.tasks.indexOf(targetTask);
+        sourceGroup.tasks.splice(targetIndex + (after ? 1 : 0), 0, task);
+        return true;
+      }
+
+      // 两个未组合事项拖到上下边缘时，只调整事项组的顺序。
+      const sourceIsStandalone = sourceGroup.tasks.length === 1 && !sourceGroup.name.trim();
+      const targetIsStandalone = targetGroup.tasks.length === 1 && !targetGroup.name.trim();
+      if (sourceIsStandalone && targetIsStandalone) {
+        state.groups.splice(source.gi, 1);
+        const targetIndex = state.groups.indexOf(targetGroup);
+        state.groups.splice(targetIndex + (after ? 1 : 0), 0, sourceGroup);
+        return true;
+      }
+
+      // 从组合拖到普通事项旁边时，拆出为新的独立事项并保留目标位置。
+      if (isCombination(sourceGroup) && targetIsStandalone) {
+        sourceGroup.tasks.splice(source.ti, 1);
+        if (!sourceGroup.tasks.length) state.groups.splice(source.gi, 1);
+        const nextTarget = locateTask(targetTask);
+        if (!nextTarget) return false;
+        state.groups.splice(nextTarget.gi + (after ? 1 : 0), 0, { name: '', tasks: [task] });
+        return true;
+      }
+
+      sourceGroup.tasks.splice(source.ti, 1);
+      if (!sourceGroup.tasks.length) state.groups.splice(source.gi, 1);
+      const nextTarget = locateTask(targetTask);
+      if (!nextTarget) return false;
+      state.groups[nextTarget.gi].tasks.splice(nextTarget.ti + (after ? 1 : 0), 0, task);
+      return true;
+    };
+    const extractDraggedTask = (task) => {
+      const source = locateTask(task);
+      if (!source || !isCombination(state.groups[source.gi])) return false;
+      state.groups[source.gi].tasks.splice(source.ti, 1);
+      if (!state.groups[source.gi].tasks.length) state.groups.splice(source.gi, 1);
+      state.groups.push({ name: '', tasks: [task] });
+      return true;
+    };
+    const addDraggedTaskToGroup = (task, targetGroup) => {
+      const source = locateTask(task);
+      if (!source || state.groups[source.gi] === targetGroup) return false;
+      state.groups[source.gi].tasks.splice(source.ti, 1);
+      if (!state.groups[source.gi].tasks.length) state.groups.splice(source.gi, 1);
+      targetGroup.tasks.push(task);
+      return true;
+    };
+    const saveTaskDragChange = (before) => {
+      recordChangedHistory(before);
+      persist();
+      syncArchivedPlan();
+      renderTaskBuilder();
+      updateSummary();
+    };
+    document.addEventListener('dragover', (event) => {
+      if (draggedTask && !event.target.closest('#task-builder')) event.preventDefault();
+    });
+    document.addEventListener('drop', (event) => {
+      if (!draggedTask || event.target.closest('#task-builder')) return;
+      event.preventDefault();
+      const before = cloneState();
+      const moved = extractDraggedTask(draggedTask);
+      finishTaskDrag();
+      if (moved) saveTaskDragChange(before);
+    });
     const renderTaskRow = (task) => {
       const row = document.createElement('div'); row.className = 'task-row';
       const noteCount = (task.files || []).length;
       const hasNote = Boolean((task.note || '').trim() || noteCount);
-      row.innerHTML = `<input class="merge-select" type="checkbox" aria-label="选择任务：${escapeHtml(task.text || '未命名任务')}"><textarea class="task-input" rows="1" placeholder="写下一件具体的任务">${escapeHtml(task.text)}</textarea>${hasNote ? '<span class="task-note" title="已添加备注">✎</span>' : ''}<button class="delete-task" title="删除事项" aria-label="删除事项">×</button>`;
-      const select = row.querySelector('.merge-select');
-      select.checked = selectedTasks.has(task);
-      select.disabled = !task.text.trim();
-      select.addEventListener('change', (event) => {
-        if (event.target.checked) selectedTasks.add(task);
-        else selectedTasks.delete(task);
-        updateMergeControls();
+      row.innerHTML = `<button class="task-drag-handle" type="button" draggable="true" title="拖动事项" aria-label="拖动事项">⠿</button><textarea class="task-input" rows="1" placeholder="写下一件具体的任务">${escapeHtml(task.text)}</textarea>${hasNote ? '<span class="task-note" title="已添加备注">✎</span>' : ''}<button class="delete-task" title="删除事项" aria-label="删除事项">×</button>`;
+      const dragHandle = row.querySelector('.task-drag-handle');
+      row.addEventListener('dragstart', (event) => {
+        if (!event.target.closest('.task-drag-handle')) { event.preventDefault(); return; }
+        draggedTask = task;
+        $('task-builder')?.classList.add('is-dragging');
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', 'planner-task');
+        requestAnimationFrame(() => row.classList.add('dragging'));
+      });
+      row.addEventListener('dragend', finishTaskDrag);
+      row.addEventListener('dragover', (event) => {
+        if (!draggedTask || draggedTask === task) return;
+        event.preventDefault();
+        event.stopPropagation();
+        event.dataTransfer.dropEffect = 'move';
+        row.classList.add('drag-over');
+        const ratio = (event.clientY - row.getBoundingClientRect().top) / Math.max(row.offsetHeight, 1);
+        const mergeTarget = isStandaloneTask(task) && isStandaloneTask(draggedTask) && ratio >= .3 && ratio <= .7;
+        row.classList.toggle('drag-merge', mergeTarget);
+        row.classList.toggle('drop-after', !mergeTarget && ratio > .5);
+      });
+      row.addEventListener('dragleave', (event) => {
+        if (!row.contains(event.relatedTarget)) row.classList.remove('drag-over', 'drop-after', 'drag-merge');
+      });
+      row.addEventListener('drop', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!draggedTask || draggedTask === task) return finishTaskDrag();
+        const ratio = (event.clientY - row.getBoundingClientRect().top) / Math.max(row.offsetHeight, 1);
+        const mergeTarget = isStandaloneTask(task) && isStandaloneTask(draggedTask) && ratio >= .3 && ratio <= .7;
+        const after = ratio > .5;
+        const before = cloneState();
+        const moved = mergeTarget ? combineStandaloneTasks(draggedTask, task) : moveDraggedTask(draggedTask, task, after);
+        finishTaskDrag();
+        if (moved) saveTaskDragChange(before);
       });
       const taskInput = row.querySelector('.task-input');
       taskInput.addEventListener('focus', () => { beginEdit(); resizeTaskInput(taskInput); requestAnimationFrame(() => resizeTaskInput(taskInput)); });
       taskInput.addEventListener('input', (event) => {
         task.text = event.target.value;
-        select.disabled = !task.text.trim();
-        if (select.disabled) { select.checked = false; selectedTasks.delete(task); }
         resizeTaskInput(event.target);
         persist();
-        updateMergeControls();
         updateSummary();
       });
       taskInput.addEventListener('blur', commitEdit);
@@ -717,7 +833,6 @@
         const location = locateTask(task);
         if (!location) return;
         recordHistory();
-        selectedTasks.delete(task);
         state.groups[location.gi].tasks.splice(location.ti, 1);
         if (!state.groups[location.gi].tasks.length) state.groups.splice(location.gi, 1);
         if (!state.groups.length) state.groups.push({ name: '', tasks: [{ text: '', done: false, note: '', files: [] }] });
@@ -725,15 +840,52 @@
         renderTaskBuilder();
         updateSummary();
       });
+      dragHandle.addEventListener('click', (event) => event.preventDefault());
       resizeTaskInput(taskInput);
       requestAnimationFrame(() => resizeTaskInput(taskInput));
       return row;
     };
     const renderTaskBuilder = () => {
       const wrap = $('task-builder'); wrap.innerHTML = '';
+      wrap.ondragover = (event) => {
+        if (!draggedTask || event.target.closest('.task-combination, .task-row')) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+        wrap.classList.add('drag-over-end');
+      };
+      wrap.ondragleave = (event) => {
+        if (!wrap.contains(event.relatedTarget)) wrap.classList.remove('drag-over-end');
+      };
+      wrap.ondrop = (event) => {
+        if (!draggedTask || event.target.closest('.task-combination, .task-row')) return;
+        event.preventDefault();
+        const before = cloneState();
+        const moved = extractDraggedTask(draggedTask);
+        finishTaskDrag();
+        if (moved) saveTaskDragChange(before);
+      };
       state.groups.forEach((group) => {
         if (isCombination(group)) {
           const combination = document.createElement('section'); combination.className = 'task-combination';
+          combination.addEventListener('dragover', (event) => {
+            if (!draggedTask || group.tasks.includes(draggedTask)) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            $('task-builder').classList.remove('drag-over-end');
+            combination.classList.add('drag-over-group');
+          });
+          combination.addEventListener('dragleave', (event) => {
+            if (!combination.contains(event.relatedTarget)) combination.classList.remove('drag-over-group');
+          });
+          combination.addEventListener('drop', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!draggedTask || group.tasks.includes(draggedTask)) return finishTaskDrag();
+            const before = cloneState();
+            const moved = addDraggedTaskToGroup(draggedTask, group);
+            finishTaskDrag();
+            if (moved) saveTaskDragChange(before);
+          });
           const head = document.createElement('div'); head.className = 'combination-head';
           head.innerHTML = '<input class="combination-name" placeholder="名称（可选）" aria-label="组合名称"><button class="ungroup-tasks" type="button">拆分</button>';
           const name = head.querySelector('.combination-name'); name.value = group.name;
@@ -744,7 +896,6 @@
             const index = state.groups.indexOf(group);
             if (index === -1) return;
             recordHistory();
-            selectedTasks = new Set([...selectedTasks].filter(task => !group.tasks.includes(task)));
             state.groups.splice(index, 1, ...group.tasks.map(task => ({ name: '', tasks: [task] })));
             persist();
             renderTaskBuilder();
@@ -757,30 +908,27 @@
           group.tasks.forEach(task => wrap.appendChild(renderTaskRow(task)));
         }
       });
-      updateMergeControls();
-    };
-    const mergeSelectedTasks = () => {
-      const selected = state.groups.flatMap(group => group.tasks).filter(task => selectedTasks.has(task) && task.text.trim());
-      if (selected.length < 2) return;
-      recordHistory();
-      const selectedSet = new Set(selected);
-      const remaining = [];
-      let insertionIndex = null;
-      state.groups.forEach(group => {
-        const kept = group.tasks.filter(task => {
-          if (!selectedSet.has(task)) return true;
-          if (insertionIndex === null) insertionIndex = remaining.length;
-          return false;
-        });
-        if (kept.length) remaining.push({ ...group, tasks: kept });
+      const dropZone = document.createElement('div');
+      dropZone.className = 'task-drop-zone';
+      dropZone.setAttribute('aria-label', '拖到这里成为独立事项');
+      dropZone.addEventListener('dragover', (event) => {
+        if (!draggedTask) return;
+        event.preventDefault();
+        event.stopPropagation();
+        event.dataTransfer.dropEffect = 'move';
+        dropZone.classList.add('drag-over');
       });
-      remaining.splice(insertionIndex === null ? remaining.length : insertionIndex, 0, { name: '', tasks: selected });
-      state.groups = remaining;
-      selectedTasks.clear();
-      persist();
-      renderTaskBuilder();
-      updateSummary();
-      setTimeout(() => $('combination-name')?.focus(), 0);
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+      dropZone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!draggedTask) return finishTaskDrag();
+        const before = cloneState();
+        const moved = extractDraggedTask(draggedTask);
+        finishTaskDrag();
+        if (moved) saveTaskDragChange(before);
+      });
+      wrap.appendChild(dropZone);
     };
     document.addEventListener('click', (event) => {
       if (!event.target.closest('.plan-card')) document.querySelectorAll('.plan-card.menu-open').forEach(card => card.classList.remove('menu-open'));
@@ -799,18 +947,22 @@
       state.groups.forEach((group) => {
         const visible = group.tasks.filter(t => t.text.trim()); if (!visible.length) return;
         const grouped = isCombination(group);
-        const g = document.createElement('div'); g.className = `summary-group${grouped ? '' : ' standalone'}`; const finished = visible.filter(t => t.done).length; total += visible.length; done += finished;
-        g.innerHTML = grouped ? `<div class="summary-group-name"><span>${escapeHtml(group.name)}</span><span class="summary-count">${finished}/${visible.length}</span></div>` : '';
+        const hasHeading = grouped && Boolean(group.name.trim());
+        const g = document.createElement('div'); g.className = `summary-group${grouped ? (hasHeading ? '' : ' no-heading') : ' standalone'}`; const finished = visible.filter(t => t.done).length; total += visible.length; done += finished;
+        g.innerHTML = hasHeading ? `<div class="summary-group-name"><span>${escapeHtml(group.name)}</span></div>` : '';
         visible.forEach(task => {
           const taskRow = document.createElement('div'); taskRow.className = 'summary-task-row';
-          const check = document.createElement('input'); check.type = 'checkbox'; check.className = 'check summary-check'; check.checked = task.done; check.setAttribute('aria-label', `完成事项：${task.text}`);
-          check.addEventListener('change', (event) => toggleTaskByReference(task, event.target.checked));
           const taskLine = document.createElement('div'); taskLine.className = 'summary-task-line';
+          taskLine.title = '点击切换完成状态';
+          taskLine.addEventListener('click', (event) => {
+            if (event.target.closest('.summary-add-note')) return;
+            toggleTaskByReference(task, !task.done);
+          });
           const t = document.createElement('div'); t.className = 'summary-task' + (task.done ? ' done' : ''); t.textContent = task.text;
           const noteTrigger = document.createElement('button'); noteTrigger.type = 'button'; noteTrigger.className = 'summary-add-note'; noteTrigger.textContent = hasTaskNote(task) ? '编辑备注' : '添加备注'; noteTrigger.setAttribute('aria-label', noteTrigger.textContent);
           noteTrigger.addEventListener('click', () => openNoteByReference(task));
           taskLine.append(t, noteTrigger);
-          taskRow.append(check, taskLine); g.appendChild(taskRow);
+          taskRow.append(taskLine); g.appendChild(taskRow);
           if ((task.note || '').trim()) {
             const note = document.createElement('div'); note.className = 'summary-note'; note.textContent = task.note.trim(); note.title = '点击查看或编辑备注';
             note.addEventListener('click', () => openNoteByReference(task));
@@ -831,7 +983,7 @@
         box.appendChild(g);
       });
       if (!box.children.length) box.innerHTML = '<div class="summary-empty">还没有具体事项。</div>';
-      const pct = total ? Math.round(done / total * 100) : 0; $('progress-number').textContent = pct + '%'; $('progress-bar').style.width = pct + '%'; $('task-total').textContent = `${total} 件事项`;
+      const pct = total ? Math.round(done / total * 100) : 0; $('progress-number').textContent = pct + '%'; $('progress-bar').style.width = pct + '%'; $('task-total').textContent = `${done}/${total}`;
     };
     /* 时间轴功能暂存于 暂存代码/时间轴/index.with-timeline.html，当前版本暂不启用。
     const makeTimelineId = () => window.crypto?.randomUUID?.() || `timeline-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -1078,7 +1230,6 @@
       updateSummary();
       setTimeout(() => $('task-builder .task-row:last-child .task-input')?.focus(), 0);
     });
-    $('merge-selected').addEventListener('click', mergeSelectedTasks);
     $('finish-plan').addEventListener('click', async () => {
       commitEdit();
       const button = $('finish-plan');
