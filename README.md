@@ -10,7 +10,7 @@ npm install
 npm start
 ```
 
-然后打开项目根目录的 `index.html`。macOS 用户也可以双击桌面的 `启动企鹅计划.command`，它会自动启动后端并打开计划软件。
+然后打开项目根目录的 `index.html`。
 
 数据库配置示例见 `server/.env.example`，实际配置文件 `server/.env` 不会提交到 Git。
 
