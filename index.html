@@ -7,6 +7,7 @@
   <title>企鹅的每日计划</title>
   <link rel="stylesheet" href="time-tracker.css">
   <link rel="stylesheet" href="mainline.css">
+  <link rel="stylesheet" href="community.css">
   <style>
     :root {
       --ink: #161616;
@@ -352,6 +353,8 @@
         <button id="nav-mainline" type="button"><span class="sidebar-nav-icon">⌁</span><span>主线</span></button>
         <button id="nav-time" type="button"><span class="sidebar-nav-icon">◷</span><span>时间</span></button>
         <button id="nav-account" type="button"><span class="sidebar-nav-icon">○</span><span>账户</span></button>
+        <button id="nav-feedback" class="nav-account-child" type="button"><span class="sidebar-nav-icon">↗</span><span>使用反馈</span></button>
+        <button id="nav-admin" class="nav-account-child" type="button" hidden><span class="sidebar-nav-icon">▦</span><span>管理中心</span></button>
       </nav>
     </aside>
   </div>
@@ -477,6 +480,16 @@
           <div class="actions account-actions"><button class="primary" id="account-login" type="button">登录</button><button class="secondary" id="account-register" type="button">注册</button><button class="secondary" id="account-logout" type="button" hidden>退出登录</button></div>
           <div class="account-actions"><button class="secondary" id="save-account" type="button">保存头像</button><button class="secondary" id="cloud-save" type="button" disabled>手动保存云端数据</button><button class="secondary" id="cloud-import" type="button" disabled>导入本机旧数据</button><button class="secondary" id="cloud-reload" type="button" disabled>重新加载云端数据</button></div>
           <p class="hint" id="cloud-status">未登录，数据仅保存在本机</p>
+          <details id="account-change-password" hidden>
+            <summary>修改密码</summary>
+            <form id="change-password-form" class="community-form">
+              <label>原密码<input name="oldPassword" type="password" autocomplete="current-password" required maxlength="200"></label>
+              <label>新密码<input name="newPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="200"></label>
+              <label>确认新密码<input name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="200"></label>
+              <button class="secondary" type="submit">修改并重新登录</button>
+              <p role="status" id="password-result"></p>
+            </form>
+          </details>
         </div>
       </div>
     </section>
@@ -832,6 +845,7 @@
       $('nav-account').classList.remove('active');
       renderMonth();
     };
+    let signedInAccount = null;
     const showAccountView = () => {
       window.mainlineLeave?.();
       $('time-view').hidden = true;
@@ -846,8 +860,8 @@
       $('history-actions').hidden = true;
       $('month-picker-wrap').hidden = true;
       $('today').hidden = true;
-      $('account-phone').value = '';
-      $('account-phone').readOnly = false;
+      $('account-phone').value = signedInAccount?.username || '';
+      $('account-phone').readOnly = Boolean(signedInAccount);
       $('account-password').value = '';
       pendingAvatar = account.avatar || '';
       renderAccountAvatar();
@@ -1666,6 +1680,7 @@
     $('cloud-import').addEventListener('click', async () => { try { await CloudClient.save(); toast('本机数据已导入云端'); } catch (error) { toast(error.message); } });
     $('cloud-reload').addEventListener('click', async () => { try { const data = await CloudClient.request('/data'); CloudClient.applyData(data); loadAccountCache(); showMonthView(); toast('已重新加载云端数据'); } catch (error) { toast(error.message); } });
     window.addEventListener('cloud-auth-changed', (event) => {
+      signedInAccount = event.detail;
       const logged = Boolean(event.detail);
       $('account-login').hidden = logged;
       $('account-register').hidden = logged;
@@ -1726,5 +1741,6 @@
   <script src="time-tracker.js"></script>
   <script src="mainline-model.js"></script>
   <script src="mainline.js"></script>
+  <script src="community.js"></script>
 </body>
 </html>

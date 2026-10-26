@@ -10,11 +10,14 @@ const port = Number(process.env.PORT || 3000);
 const sessionDays = Number(process.env.SESSION_DAYS || 30);
 const cookieName = 'penguin_session';
 const scrypt = promisify(crypto.scrypt);
-const pool = mysql.createPool({ host: process.env.MYSQL_HOST || '127.0.0.1', port: Number(process.env.MYSQL_PORT || 3306), database: process.env.MYSQL_DATABASE || 'penguin_planner', user: process.env.MYSQL_USER || 'root', password: process.env.MYSQL_PASSWORD || '', connectionLimit: 10, charset: 'utf8mb4' });
+const pool = mysql.createPool({ host: process.env.MYSQL_HOST || '127.0.0.1', port: Number(process.env.MYSQL_PORT || 3306), database: process.env.MYSQL_DATABASE || 'penguin_planner', user: process.env.MYSQL_USER || 'root', password: process.env.MYSQL_PASSWORD || '', connectionLimit: 10, charset: 'utf8mb4', timezone: 'Z' });
+pool.on('connection', connection => connection.query("SET time_zone = '+00:00'"));
 
 app.use(express.json({ limit: '4mb' }));
 app.use(express.raw({ type: '*/*', limit: '16mb' }));
 app.use(cookieParser());
+app.use('/api', (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
+app.use(['/server', '/deploy'], (req, res) => res.sendStatus(404));
 app.use(express.static(require('path').join(__dirname, '..')));
 
 const hashToken = token => crypto.createHash('sha256').update(token).digest('hex');
@@ -23,9 +26,15 @@ const passwordMatches = async (password, stored) => { const [, salt, hex] = Stri
 const validCredential = value => typeof value === 'string' && value.trim().length >= 3 && value.trim().length <= 120;
 const sessionCookie = { httpOnly: true, sameSite: 'lax', secure: process.env.COOKIE_SECURE === 'true', maxAge: sessionDays * 86400000, path: '/' };
 
+async function recordActivity(userId) {
+  await pool.execute('INSERT INTO user_activity (user_id,last_seen_at) VALUES (?,UTC_TIMESTAMP()) ON DUPLICATE KEY UPDATE last_seen_at=IF(last_seen_at < UTC_TIMESTAMP() - INTERVAL 1 MINUTE, UTC_TIMESTAMP(), last_seen_at)', [userId]);
+  await pool.execute('INSERT IGNORE INTO user_activity_days (user_id,active_date) VALUES (?,UTC_DATE())', [userId]);
+}
+
 async function currentUser(req) {
   const token = req.cookies[cookieName]; if (!token) return null;
-  const [rows] = await pool.execute('SELECT u.id, u.username FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at > UTC_TIMESTAMP()', [hashToken(token)]);
+  const [rows] = await pool.execute("SELECT u.id, u.username, COALESCE(r.role, 'user') AS role FROM sessions s JOIN users u ON u.id=s.user_id LEFT JOIN user_roles r ON r.user_id=u.id WHERE s.token_hash=? AND s.expires_at > UTC_TIMESTAMP()", [hashToken(token)]);
+  if (rows[0]) await recordActivity(rows[0].id);
   return rows[0] || null;
 }
 async function requireUser(req, res, next) { try { req.user = await currentUser(req); if (!req.user) return res.status(401).json({ error: '请先登录' }); next(); } catch (error) { next(error); } }
@@ -37,7 +46,7 @@ app.post('/api/account/register', async (req, res, next) => {
 app.post('/api/account/login', async (req, res, next) => {
   try { const username = String(req.body?.username || '').trim(); const password = String(req.body?.password || ''); const [rows] = await pool.execute('SELECT id,username,password_hash FROM users WHERE username=?', [username]); if (!rows[0] || !(await passwordMatches(password, rows[0].password_hash))) return res.status(401).json({ error: '用户名或密码错误' }); await createSession(rows[0].id, res); res.json({ id: rows[0].id, username: rows[0].username }); } catch (error) { next(error); }
 });
-async function createSession(userId, res) { const token = crypto.randomBytes(32).toString('base64url'); const expires = new Date(Date.now() + sessionDays * 86400000); await pool.execute('INSERT INTO sessions (token_hash,user_id,expires_at) VALUES (?,?,?)', [hashToken(token), userId, expires]); res.cookie(cookieName, token, sessionCookie); }
+async function createSession(userId, res) { const token = crypto.randomBytes(32).toString('base64url'); const expires = new Date(Date.now() + sessionDays * 86400000); await pool.execute('INSERT INTO sessions (token_hash,user_id,expires_at) VALUES (?,?,?)', [hashToken(token), userId, expires]); await recordActivity(userId); res.cookie(cookieName, token, sessionCookie); }
 app.post('/api/account/logout', async (req, res, next) => { try { const token = req.cookies[cookieName]; if (token) await pool.execute('DELETE FROM sessions WHERE token_hash=?', [hashToken(token)]); res.clearCookie(cookieName, { httpOnly: true, sameSite: 'lax', secure: sessionCookie.secure, path: '/' }); res.status(204).end(); } catch (error) { next(error); } });
 app.get('/api/account/me', async (req, res, next) => { try { const user = await currentUser(req); if (!user) return res.status(401).json({ error: '未登录' }); res.json(user); } catch (error) { next(error); } });
 
@@ -47,6 +56,7 @@ app.put('/api/data', requireUser, async (req, res, next) => { try { const data =
 app.put('/api/files/:id', requireUser, async (req, res, next) => { try { if (!/^[0-9a-f-]{20,50}$/i.test(req.params.id) || !Buffer.isBuffer(req.body)) return res.status(400).json({ error: '文件无效' }); let name = String(req.get('x-file-name') || '未命名文件'); try { name = decodeURIComponent(name); } catch (_) {} name = name.slice(0, 255); const mime = String(req.get('content-type') || 'application/octet-stream').slice(0, 255); await pool.execute('INSERT INTO user_files (id,user_id,name,mime,content) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),mime=VALUES(mime),content=VALUES(content)', [req.params.id, req.user.id, name, mime, req.body]); res.status(204).end(); } catch (error) { next(error); } });
 app.get('/api/files/:id', requireUser, async (req, res, next) => { try { const [rows] = await pool.execute('SELECT name,mime,content FROM user_files WHERE id=? AND user_id=?', [req.params.id, req.user.id]); if (!rows[0]) return res.status(404).json({ error: '文件不存在' }); res.set({ 'Content-Type': rows[0].mime, 'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(rows[0].name)}` }); res.send(rows[0].content); } catch (error) { next(error); } });
 app.delete('/api/files/:id', requireUser, async (req, res, next) => { try { await pool.execute('DELETE FROM user_files WHERE id=? AND user_id=?', [req.params.id, req.user.id]); res.status(204).end(); } catch (error) { next(error); } });
-app.use((error, req, res, next) => { console.error(error); if (!res.headersSent) res.status(500).json({ error: '服务器暂时无法处理请求' }); });
+require('./management')(app, { pool, requireUser, passwordHash, passwordMatches });
+app.use((error, req, res, next) => { console.error(error); if (!res.headersSent) res.status(error.type === 'entity.too.large' ? 413 : error.type === 'entity.parse.failed' ? 400 : 500).json({ error: error.type === 'entity.too.large' ? '提交内容过大，请压缩图片后重试' : error.type === 'entity.parse.failed' ? '请求格式无效' : '服务器暂时无法处理请求' }); });
 if (require.main === module) app.listen(port, () => console.log(`Planner server listening on ${port}`));
 module.exports = app;
