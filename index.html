@@ -127,7 +127,7 @@
     .secondary:hover { background: #fff; }
 
     .task-builder { margin-top: 35px; display: grid; gap: 10px; }
-    .task-combination { display: grid; gap: 6px; padding: 15px 17px; border: 1px solid #d7d7d3; border-radius: var(--radius-lg); background: var(--gray-surface); }
+    .task-combination { display: grid; gap: 6px; padding: 15px 17px; border: 0; border-radius: var(--radius-lg); background: var(--gray-surface); }
     .combination-head { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
     .combination-name { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid transparent; outline: 0; padding: 5px 0; color: var(--ink); background: transparent; font: inherit; font-size: 13px; font-weight: 700; }
     .combination-name::placeholder { color: #9d9d99; font-weight: 500; }
@@ -147,7 +147,7 @@
     .task-builder > .task-row:last-of-type { border-bottom-color: transparent; }
     .task-combination .task-row { border-bottom-color: rgba(190,190,186,.55); }
     .task-combination .task-row:last-child { border-bottom-color: transparent; }
-    .task-combination.drag-over-group { border-color: var(--ink); background: #e5e5e2; }
+    .task-combination.drag-over-group { background: #e5e5e2; }
     .task-drag-handle { flex: 0 0 auto; width: 18px; height: 28px; margin-top: 2px; border: 0; padding: 0; color: #aaa9a5; background: transparent; font-size: 15px; line-height: 1; letter-spacing: -3px; cursor: grab; }
     .task-drag-handle:hover { color: var(--ink); }
     .task-drag-handle:active { cursor: grabbing; }
@@ -157,45 +157,49 @@
     .task-note { margin-top: 9px; color: #858581; font-size: 11px; white-space: nowrap; }
     .delete-task { border: 0; width: 24px; height: 28px; margin-top: 2px; padding: 0; color: #aaa9a5; background: transparent; font-size: 18px; line-height: 1; }
     .delete-task:hover { color: var(--ink); }
-    .add-task { margin-top: 10px; border: 1px dashed #bdbdb9; color: #696966; background: transparent; border-radius: var(--radius-lg); padding: 14px; width: 100%; font-size: 13px; transition: border .2s, background .2s; }
-    .add-task:hover { background: rgba(255,255,255,.75); border-color: var(--ink); }
+    .add-task { display: flex; align-items: center; justify-content: flex-start; margin-top: 10px; border: 0; padding: 0; width: fit-content; background: transparent; }
+    .add-task::before { content: "+"; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; background: var(--ink); font-size: 18px; line-height: 1; transition: background .2s; }
+    .add-task:hover::before { background: #333; }
 
     .side-panel { padding: 28px; position: sticky; top: 20px; }
     .side-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 23px; }
     .side-title h2 { font-size: 18px; margin: 0; letter-spacing: -.03em; }
     .side-title span { color: var(--muted); font-size: 12px; }
-    .progress-wrap { padding: 17px; border: 0; border-radius: var(--radius-lg); background: var(--gray-surface); margin-bottom: 22px; }
-    .progress-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 13px; }
-    .progress-label strong { font-size: 30px; letter-spacing: -.06em; }
-    .progress-label span { color: var(--muted); font-size: 12px; }
-    .progress-track { height: 7px; border-radius: 99px; background: var(--gray-track); overflow: hidden; }
+    .progress-heading { margin-bottom: 12px; color: var(--ink); font-size: 18px; font-weight: 700; letter-spacing: -.03em; }
+    .progress-wrap { display: flex; align-items: center; gap: 10px; padding: 13px 17px; border: 0; border-radius: var(--radius-lg); background: var(--gray-surface); margin-bottom: 22px; }
+    .progress-track { flex: 1; min-width: 0; height: 7px; border-radius: 99px; background: var(--gray-track); overflow: hidden; }
     .progress-bar { width: 0%; height: 100%; border-radius: inherit; background: var(--ink); transition: width .35s ease; }
+    .progress-value { flex: 0 0 auto; color: var(--ink); font-size: 13px; font-weight: 600; letter-spacing: 0; }
     .plan-summary { display: grid; gap: 10px; }
     .summary-empty { color: #a3a39f; font-size: 13px; line-height: 1.7; padding: 17px 2px; }
     .summary-group { padding: 16px 17px; border: 0; border-radius: var(--radius-lg); background: var(--gray-surface); }
     .summary-group.no-heading .summary-task-row:first-child { margin-top: 0; }
-    .summary-group.standalone { padding: 5px 0; border: 0; border-radius: 0; background: transparent; }
+    .summary-group.standalone { padding: 5px 17px; border: 0; border-radius: 0; background: transparent; }
     .summary-group.standalone .summary-task-row { margin-top: 0; }
     .summary-group-name { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; }
     .summary-task-row { display: block; margin-top: 7px; }
     .summary-task-line { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
     .summary-task-line { cursor: pointer; }
     .summary-task-line:hover .summary-task { color: var(--ink); }
-    .summary-group:not(.standalone) .summary-note { margin-left: 0; max-width: 100%; }
-    .summary-group:not(.standalone) .summary-files { margin-left: 0; }
-    .summary-task { flex: 1; min-width: 0; color: #6d6d69; font-size: 12px; line-height: 1.7; display: flex; gap: 7px; }
+    .summary-checkbox { flex: 0 0 auto; width: 15px; height: 15px; margin: 3px 0 0; accent-color: var(--ink); cursor: pointer; }
+    .summary-detail { display: grid; grid-template-columns: 15px minmax(0, 1fr); column-gap: 10px; margin-top: 3px; }
+    .summary-detail::before { content: ""; justify-self: center; width: 1px; border-radius: 99px; background: #d5d5d1; }
+    .summary-detail-body { min-width: 0; display: grid; gap: 7px; align-content: start; }
+    .summary-task { flex: 1; min-width: 0; color: var(--ink); font-size: 12px; line-height: 1.7; display: flex; gap: 7px; }
     .summary-task::before { content: none; }
     .summary-task.done { color: #b2b2ae; text-decoration: line-through; }
     .summary-task.done::before { content: none; }
     .summary-add-note { flex: 0 0 auto; border: 0; padding: 2px 0; color: #9b9b97; background: transparent; font-size: 11px; opacity: 0; cursor: pointer; transition: color .2s, opacity .2s; }
     .summary-task-row:hover .summary-add-note, .summary-add-note:focus { opacity: 1; }
     .summary-add-note:hover { color: var(--ink); }
-    .summary-note { display: inline-block; max-width: calc(100% - 26px); margin: 8px 0 0 26px; padding: 10px 15px; border: 0; border-radius: var(--radius-md); color: #5e5e5a; background: var(--gray-surface); font-size: 12px; font-weight: 400; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; cursor: pointer; }
-    .summary-note:hover { color: var(--ink); background: var(--gray-surface); }
-    .summary-files { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0 0 18px; }
-    .summary-file { width: 25px; height: 25px; border: 0; border-radius: 50%; color: #777773; background: var(--gray-surface); display: grid; place-items: center; font-size: 12px; cursor: pointer; }
-    .summary-file:hover { color: #fff; background: var(--ink); }
-    .summary-file:disabled { color: #aaa; background: var(--gray-surface); cursor: help; }
+    .summary-note { min-width: 0; margin: 0; padding: 2px 0 0; border: 0; border-radius: 0; color: #7d7d79; background: transparent; font-size: 12px; font-weight: 400; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; cursor: pointer; }
+    .summary-note:hover { color: var(--ink); }
+    .summary-files { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 0 1px; }
+    .summary-file { width: 22px; height: 22px; padding: 0; border: 0; background: #a3a39f; cursor: pointer; transition: background .2s; }
+    .summary-file.is-photo { border-radius: 5px; }
+    .summary-file.is-file { clip-path: polygon(50% 6%, 96% 92%, 0% 92%); }
+    .summary-file:hover { background: var(--ink); }
+    .summary-file:disabled { background: #d0d0cc; cursor: help; }
 
     .month-view { animation: slideIn .38s ease both; }
     .month-hero { padding: 15px 4px 25px; }
@@ -293,17 +297,17 @@
 
     .checklist-view { animation: slideIn .38s ease both; }
     .checklist-panel { max-width: 820px; margin: 0 auto; padding: clamp(28px, 5vw, 52px); }
-    .checklist-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 22px; margin-bottom: 28px; }
+    .checklist-header { position: relative; margin-bottom: 28px; }
     .checklist-header h1 { margin: 0; font-size: clamp(32px, 4.5vw, 50px); line-height: 1.1; letter-spacing: -.06em; }
-    .checklist-intent-label { margin-top: 17px; color: var(--muted); font-size: 15px; font-weight: 700; letter-spacing: .08em; }
-    .checklist-intent { max-width: 620px; margin: 7px 0 0; padding: 15px 18px; border: 0; border-radius: var(--radius-lg); color: var(--ink); background: var(--gray-surface); font-size: 15px; font-weight: 600; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .step-context { max-width: 650px; margin-top: 25px; padding: 15px 18px; border: 0; border-radius: var(--radius-md); background: var(--gray-surface); }
+    .checklist-header > .secondary { position: absolute; top: 0; right: 0; width: auto; }
+    .checklist-intent-label { margin-top: 17px; color: var(--ink); font-size: 18px; font-weight: 700; letter-spacing: -.03em; }
+    .checklist-intent { margin: 7px 0 0; padding: 15px 18px; border: 0; border-radius: var(--radius-lg); color: var(--ink); background: var(--gray-surface); font-size: 15px; font-weight: 600; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .step-context { margin-top: 25px; padding: 15px 18px; border: 0; border-radius: var(--radius-md); background: var(--gray-surface); }
     .step-context-label { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; }
     .step-context-text { margin: 6px 0 0; color: var(--ink); font-size: 17px; font-weight: 650; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
     .checklist-summary { display: grid; gap: 10px; }
     .checklist-panel .summary-task-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; }
     .checklist-panel .summary-task { margin-top: 0; }
-    .checklist-panel .summary-note, .checklist-panel .summary-files { margin-left: 26px; }
     .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(15,15,15,.3); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; z-index: 5; }
     .modal-backdrop.open { display: flex; }
     .modal { width: min(470px, 100%); background: #fbfbfa; border-radius: 27px; box-shadow: 0 30px 90px rgba(0,0,0,.22); padding: 28px; animation: pop .25s ease both; }
@@ -319,11 +323,27 @@
     .file-drop strong { display: block; font-weight: 400; transform: translateY(-1px); }
     .file-list { display: flex; flex-wrap: wrap; gap: 7px; }
     .file-item { display: inline-flex; }
-    .file-name { display: none; }
-    .file-open { width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; color: #777773; background: var(--gray-surface); display: grid; place-items: center; font-size: 12px; cursor: pointer; }
-    .file-open:hover { color: #fff; background: var(--ink); }
-    .file-open:disabled { color: #aaa; background: var(--gray-surface); cursor: help; }
+    .file-open { width: 26px; height: 26px; padding: 0; border: 0; background: #a3a39f; cursor: pointer; transition: background .2s; }
+    .file-open.is-photo { border-radius: 6px; }
+    .file-open.is-file { clip-path: polygon(50% 6%, 96% 92%, 4% 92%); }
+    .file-open:hover { background: var(--ink); }
+    .file-open:disabled { background: #d0d0cc; cursor: help; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 23px; }
+    .preview-backdrop { display: none; position: fixed; inset: 0; z-index: 40; align-items: center; justify-content: center; padding: 24px; background: rgba(15,15,15,.55); backdrop-filter: blur(8px); }
+    .preview-backdrop.open { display: flex; }
+    .preview-panel { width: min(960px, 100%); max-height: calc(100vh - 48px); display: flex; flex-direction: column; overflow: hidden; border-radius: 24px; background: #fbfbfa; box-shadow: 0 30px 90px rgba(0,0,0,.28); animation: pop .25s ease both; }
+    .preview-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px 20px; border-bottom: 1px solid var(--line); }
+    .preview-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+    .preview-close { flex: 0 0 auto; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: rgba(255,255,255,.7); font-size: 18px; line-height: 1; }
+    .preview-close:hover { background: #fff; }
+    .preview-body { flex: 1; min-height: 0; display: grid; place-items: center; padding: 20px; overflow: auto; background: var(--soft); }
+    .preview-body img, .preview-body video { max-width: 100%; max-height: calc(100vh - 190px); border-radius: 12px; object-fit: contain; }
+    .preview-body iframe { width: 100%; height: calc(100vh - 190px); min-height: 360px; border: 0; border-radius: 12px; background: #fff; }
+    .preview-body audio { width: min(420px, 100%); }
+    .preview-body pre { width: 100%; max-height: calc(100vh - 190px); margin: 0; padding: 18px; overflow: auto; border-radius: 12px; background: #fff; color: #444; font-size: 13px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .preview-message { display: grid; gap: 14px; justify-items: center; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .preview-download { border: 1px solid var(--line); border-radius: 99px; padding: 10px 16px; color: var(--ink); background: #fff; font-size: 13px; }
+    .preview-download:hover { background: var(--gray-surface); }
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; padding: 11px 17px; color: #fff; background: var(--ink); border-radius: 99px; font-size: 12px; transition: all .25s; z-index: 10; }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
@@ -337,7 +357,6 @@
       .topbar { margin-bottom: 20px; }
       .month-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .history-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .checklist-header { flex-direction: column; }
       .mainline-section { padding: 21px 18px 23px; }
       .mainline-head { flex-direction: column; }
       .mainline-add { align-self: flex-start; }
@@ -402,7 +421,7 @@
           <p class="subcopy">先把任务一件件写下来，把任务拖到一起即可合并，也可以随时调整顺序。</p>
           <div class="step-context"><div class="step-context-label">今日大致计划</div><p class="step-context-text" id="step-two-story"></p></div>
           <div id="task-builder" class="task-builder"></div>
-          <button class="add-task" id="add-task" type="button">＋ 新增一个事项</button>
+          <button class="add-task" id="add-task" type="button" aria-label="新增一个事项"></button>
           <div class="actions"><button class="secondary" id="back-step-one">← 返回上一步</button><button class="primary" id="finish-plan">写好了 ✓</button></div>
         </div>
       </section>
@@ -413,14 +432,14 @@
       <div class="panel checklist-panel">
         <div class="checklist-header">
           <div>
-            <div class="eyebrow" style="margin-bottom:8px">PLAN / 记录</div>
             <h1>计划清单</h1>
             <div class="checklist-intent-label">今日大致计划</div>
             <p class="checklist-intent" id="checklist-story"></p>
           </div>
           <button class="secondary" id="edit-current-plan">编辑事项</button>
         </div>
-        <div class="progress-wrap"><div class="progress-label"><strong id="progress-number">0%</strong><span>完成进度</span></div><div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div></div>
+        <div class="progress-heading">完成进度</div>
+        <div class="progress-wrap"><div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div><strong class="progress-value" id="progress-number">0%</strong></div>
         <div class="side-title"><h2>待完成事项</h2><span id="task-total">0/0</span></div>
         <div id="plan-summary" class="plan-summary checklist-summary"><div class="summary-empty">还没有具体事项。</div></div>
       </div>
@@ -525,6 +544,12 @@
       <div class="modal-actions"><button class="secondary" id="skip-note">暂时不要</button><button class="primary" id="save-note">保存备注</button></div>
     </div>
   </div>
+  <div class="preview-backdrop" id="attachment-preview" role="dialog" aria-modal="true" aria-labelledby="attachment-preview-title">
+    <div class="preview-panel">
+      <div class="preview-head"><strong class="preview-title" id="attachment-preview-title"></strong><button class="preview-close" id="attachment-preview-close" type="button" aria-label="关闭预览">×</button></div>
+      <div class="preview-body" id="attachment-preview-body"></div>
+    </div>
+  </div>
   <div class="toast" id="toast">已保存</div>
 
   <script src="vendor/gsap.min.js"></script>
@@ -533,6 +558,7 @@
     const STORAGE_KEY = 'penguin-daily-plan-v1';
     const ARCHIVE_KEY = 'penguin-daily-plans-v1';
     const ACCOUNT_KEY = 'penguin-planner-local-account-v1';
+    const CREDENTIAL_KEY = 'penguin-planner-local-credential-v1';
     const $ = (id) => document.getElementById(id);
     const dateKey = (date = new Date()) => {
       const year = date.getFullYear();
@@ -543,6 +569,10 @@
     const todayKey = dateKey();
     let account = (() => { try { const raw = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null'); return { avatar: typeof raw?.avatar === 'string' ? raw.avatar : '', name: typeof raw?.name === 'string' ? raw.name : '' }; } catch (error) { return { avatar: '', name: '' }; } })();
     const saveAccountCache = () => localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ avatar: account.avatar || '', name: account.name || '' }));
+    const loadCredential = () => { try { const raw = JSON.parse(localStorage.getItem(CREDENTIAL_KEY) || 'null'); return raw && typeof raw.username === 'string' && typeof raw.password === 'string' ? raw : null; } catch (error) { return null; } };
+    const saveCredential = (username, password) => { try { localStorage.setItem(CREDENTIAL_KEY, JSON.stringify({ username, password })); } catch (error) {} };
+    const clearCredential = () => localStorage.removeItem(CREDENTIAL_KEY);
+    const savedPasswordFor = username => { const saved = loadCredential(); return saved && saved.username === username ? saved.password : ''; };
     const storageKey = (base) => `${base}:local`;
     [STORAGE_KEY, ARCHIVE_KEY].forEach((base) => { if (!localStorage.getItem(storageKey(base)) && localStorage.getItem(base)) localStorage.setItem(storageKey(base), localStorage.getItem(base)); });
     const TIMELINE_COLORS = ['#ffffff', '#f2f2f0', '#e7e7e4', '#d9d9d6', '#c9c9c5', '#b9b9b5'];
@@ -845,6 +875,18 @@
       const nameNode = $('account-name-display');
       if (nameNode) nameNode.textContent = signedInAccount?.display_name || account.name || '';
     };
+    const renderAccountCredential = () => {
+      const field = $('account-password-field');
+      const password = $('account-password');
+      if (!field || !password) return;
+      field.hidden = false;
+      const logged = Boolean(signedInAccount);
+      const saved = logged ? savedPasswordFor(signedInAccount.username) : '';
+      password.value = saved;
+      password.type = logged ? 'text' : 'password';
+      password.readOnly = logged;
+      password.placeholder = logged ? (saved ? '' : '本机未保存密码') : '至少 8 个字符';
+    };
     const updateDateChip = () => { $('today').textContent = formatDate(activeDate); };
     const showMonthView = () => {
       window.mainlineLeave?.();
@@ -885,7 +927,7 @@
       $('account-phone').value = signedInAccount?.username || '';
       $('account-phone').readOnly = Boolean(signedInAccount);
       $('account-name').value = signedInAccount?.display_name || account.name || '';
-      $('account-password').value = '';
+      renderAccountCredential();
       renderAccountAvatar();
       $('nav-daily').classList.remove('active');
       $('nav-account').classList.add('active');
@@ -1054,21 +1096,72 @@
       if (local?.blob) return local;
       return null;
     };
-    const openStoredFile = async (file) => {
-      if (!file.id) return toast('这是旧版本保存的文件名，请重新添加原文件');
-      const popup = window.open('', '_blank');
-      if (!popup) return toast('浏览器阻止了打开新窗口，请允许弹窗后重试');
+    const attachmentIsImage = (file) => {
+      const type = String(file.type || '').toLowerCase();
+      if (type.startsWith('image/')) return true;
+      return /\.(png|jpe?g|gif|webp|bmp|svg|avif|heic|heif)$/i.test(file.name || '');
+    };
+    const attachmentPreviewKind = (file, blob) => {
+      const type = String(file.type || blob?.type || '').toLowerCase();
+      const name = String(file.name || '').toLowerCase();
+      if (type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg|avif|heic|heif)$/.test(name)) return 'image';
+      if (type === 'application/pdf' || name.endsWith('.pdf')) return 'pdf';
+      if (type.startsWith('video/')) return 'video';
+      if (type.startsWith('audio/')) return 'audio';
+      if (type.startsWith('text/') || /\.(txt|md|markdown|json|csv|log|xml|ya?ml)$/.test(name)) return 'text';
+      return 'other';
+    };
+    let previewUrl = null;
+    const closeAttachmentPreview = () => {
+      const preview = $('attachment-preview');
+      if (!preview) return;
+      preview.classList.remove('open');
+      $('attachment-preview-body').replaceChildren();
+      $('attachment-preview-title').textContent = '';
+      if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+    };
+    const openAttachmentPreview = async (file) => {
       try {
-        const stored = await readAttachment(file.id);
-        if (!stored?.blob && window.CloudClient?.isLoggedIn()) return await CloudClient.openFile(file);
-        if (!stored?.blob) throw new Error('找不到文件内容');
-        const url = URL.createObjectURL(stored.blob);
-        // Download arbitrary attachments instead of executing HTML/SVG in this origin.
-        popup.close();
-        const link = document.createElement('a'); link.href = url; link.download = file.name; link.click();
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        let blob = file.blob || null;
+        if (!blob && file.id) {
+          const stored = await readAttachment(file.id);
+          blob = stored?.blob || null;
+          if (!blob && window.CloudClient?.isLoggedIn()) blob = await CloudClient.fetchFile(file.id);
+        }
+        if (!blob) throw new Error('找不到文件内容');
+        const type = file.type || blob.type || '';
+        if (type && blob.type !== type) blob = new Blob([blob], { type });
+        let kind = attachmentPreviewKind(file, blob);
+        // Only render real PDFs in an iframe: blob URLs inherit this origin, so a disguised HTML file must never execute here.
+        if (kind === 'pdf') {
+          const head = new TextDecoder().decode(await blob.slice(0, 5).arrayBuffer());
+          if (head === '%PDF-') blob = new Blob([blob], { type: 'application/pdf' });
+          else kind = 'other';
+        }
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = URL.createObjectURL(blob);
+        const body = $('attachment-preview-body');
+        body.replaceChildren();
+        $('attachment-preview-title').textContent = file.name || '未命名文件';
+        if (kind === 'image') {
+          const image = new Image(); image.src = previewUrl; image.alt = file.name || '图片'; body.append(image);
+        } else if (kind === 'pdf') {
+          const frame = document.createElement('iframe'); frame.src = previewUrl; frame.title = file.name || '文件预览'; body.append(frame);
+        } else if (kind === 'video') {
+          const video = document.createElement('video'); video.src = previewUrl; video.controls = true; body.append(video);
+        } else if (kind === 'audio') {
+          const audio = document.createElement('audio'); audio.src = previewUrl; audio.controls = true; body.append(audio);
+        } else if (kind === 'text') {
+          const pre = document.createElement('pre'); pre.textContent = await blob.text(); body.append(pre);
+        } else {
+          const message = document.createElement('div'); message.className = 'preview-message';
+          const hint = document.createElement('div'); hint.textContent = '该文件类型暂不支持直接预览，可下载后用本地应用打开。';
+          const download = document.createElement('a'); download.className = 'preview-download'; download.href = previewUrl; download.download = file.name || '文件'; download.textContent = '下载文件';
+          message.append(hint, download); body.append(message);
+        }
+        $('attachment-preview').classList.add('open');
       } catch (error) {
-        popup.close();
+        closeAttachmentPreview();
         toast('文件内容已丢失，请重新添加原文件');
       }
     };
@@ -1364,25 +1457,45 @@
             toggleTaskByReference(task, !task.done);
           });
           const t = document.createElement('div'); t.className = 'summary-task' + (task.done ? ' done' : ''); t.textContent = task.text;
+          const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.className = 'summary-checkbox'; checkbox.checked = Boolean(task.done); checkbox.setAttribute('aria-label', task.done ? '标记为未完成' : '标记为完成');
+          checkbox.addEventListener('click', (event) => event.stopPropagation());
+          checkbox.addEventListener('change', () => toggleTaskByReference(task, checkbox.checked));
           const noteTrigger = document.createElement('button'); noteTrigger.type = 'button'; noteTrigger.className = 'summary-add-note'; noteTrigger.textContent = hasTaskNote(task) ? '编辑备注' : '添加备注'; noteTrigger.setAttribute('aria-label', noteTrigger.textContent);
           noteTrigger.addEventListener('click', () => openNoteByReference(task));
-          taskLine.append(t, noteTrigger);
+          taskLine.append(checkbox, t, noteTrigger);
           taskRow.append(taskLine); g.appendChild(taskRow);
-          if ((task.note || '').trim()) {
-            const note = document.createElement('div'); note.className = 'summary-note'; note.textContent = task.note.trim(); note.title = '点击查看或编辑备注';
-            note.addEventListener('click', () => openNoteByReference(task));
-            g.appendChild(note);
-          }
-          if ((task.files || []).length) {
-            const files = document.createElement('div'); files.className = 'summary-files';
-            (task.files || []).forEach(rawFile => {
-              const file = typeof rawFile === 'string' ? { id: '', name: rawFile } : rawFile;
-              const fileButton = document.createElement('button'); fileButton.className = 'summary-file'; fileButton.textContent = '●'; fileButton.title = file.name || '未命名文件'; fileButton.setAttribute('aria-label', `打开文件 ${file.name || '未命名文件'}`);
-              if (file.id) fileButton.addEventListener('click', () => openStoredFile(file));
-              else { fileButton.disabled = true; fileButton.title = `${file.name || '未命名文件'}（旧附件，请重新添加）`; }
-              files.appendChild(fileButton);
-            });
-            g.appendChild(files);
+          const noteText = (task.note || '').trim();
+          const taskFiles = task.files || [];
+          if (noteText || taskFiles.length) {
+            const detail = document.createElement('div'); detail.className = 'summary-detail';
+            const detailBody = document.createElement('div'); detailBody.className = 'summary-detail-body';
+            if (noteText) {
+              const note = document.createElement('div'); note.className = 'summary-note'; note.textContent = noteText; note.title = '点击查看或编辑备注';
+              note.addEventListener('click', () => openNoteByReference(task));
+              detailBody.appendChild(note);
+            }
+            if (taskFiles.length) {
+              const files = document.createElement('div'); files.className = 'summary-files';
+              taskFiles.forEach(rawFile => {
+                const file = typeof rawFile === 'string' ? { id: '', name: rawFile, type: '' } : rawFile;
+                const photo = attachmentIsImage(file);
+                const fileButton = document.createElement('button');
+                fileButton.className = `summary-file ${photo ? 'is-photo' : 'is-file'}`;
+                if (file.id || file.blob) {
+                  fileButton.title = `${photo ? '预览照片' : '预览文件'} ${file.name || '未命名文件'}`;
+                  fileButton.setAttribute('aria-label', fileButton.title);
+                  fileButton.addEventListener('click', () => openAttachmentPreview(file));
+                } else {
+                  fileButton.disabled = true;
+                  fileButton.title = `${file.name || '未命名文件'}（旧附件，请重新添加）`;
+                  fileButton.setAttribute('aria-label', fileButton.title);
+                }
+                files.appendChild(fileButton);
+              });
+              detailBody.appendChild(files);
+            }
+            detail.appendChild(detailBody);
+            g.appendChild(detail);
           }
         });
         box.appendChild(g);
@@ -1591,12 +1704,22 @@
     const renderFileList = (files = []) => {
       const list = $('file-list'); list.innerHTML = '';
       files.forEach(rawFile => {
-        const file = typeof rawFile === 'string' ? { id: '', name: rawFile } : rawFile;
+        const file = typeof rawFile === 'string' ? { id: '', name: rawFile, type: '' } : rawFile;
+        const photo = attachmentIsImage(file);
         const item = document.createElement('div'); item.className = 'file-item';
-        const name = document.createElement('span'); name.className = 'file-name'; name.textContent = `◌ ${file.name || '未命名文件'}`;
-        const open = document.createElement('button'); open.className = 'file-open'; open.textContent = '●'; open.title = file.id ? `打开 ${file.name || '未命名文件'}` : `${file.name || '未命名文件'}（旧附件，请重新添加）`; open.setAttribute('aria-label', open.title); open.disabled = !file.id;
-        if (file.id) open.addEventListener('click', () => openStoredFile(file));
-        item.append(name, open); list.appendChild(item);
+        const open = document.createElement('button');
+        open.className = `file-open ${photo ? 'is-photo' : 'is-file'}`;
+        const canPreview = Boolean(file.id || file.blob);
+        if (canPreview) {
+          open.title = `${photo ? '预览照片' : '预览文件'} ${file.name || '未命名文件'}`;
+          open.setAttribute('aria-label', open.title);
+          open.addEventListener('click', () => openAttachmentPreview(file));
+        } else {
+          open.disabled = true;
+          open.title = `${file.name || '未命名文件'}（旧附件，请重新添加）`;
+          open.setAttribute('aria-label', open.title);
+        }
+        item.append(open); list.appendChild(item);
       });
     };
     const openNote = (gi, ti) => {
@@ -1704,11 +1827,26 @@
       const username = $('account-phone').value.trim();
       const password = $('account-password').value;
       if (!username || !password) return toast('请输入账户和密码');
-      try { await CloudClient.login(username, password, register, $('account-name').value.trim()); } catch (error) { toast(error.message); }
+      const previousCredential = localStorage.getItem(CREDENTIAL_KEY);
+      saveCredential(username, password);
+      try { await CloudClient.login(username, password, register, $('account-name').value.trim()); }
+      catch (error) {
+        if (previousCredential === null) clearCredential();
+        else localStorage.setItem(CREDENTIAL_KEY, previousCredential);
+        toast(error.message);
+      }
     };
     $('account-login').addEventListener('click', () => accountAction(false));
     $('account-register').addEventListener('click', () => accountAction(true));
-    $('account-logout').addEventListener('click', async () => { try { await CloudClient.logout(); } catch (error) { toast(error.message); } });
+    $('account-logout').addEventListener('click', async () => {
+      const saved = loadCredential();
+      clearCredential();
+      try { await CloudClient.logout(); }
+      catch (error) {
+        if (saved) saveCredential(saved.username, saved.password);
+        toast(error.message);
+      }
+    });
     $('cloud-save').addEventListener('click', async () => { try { await CloudClient.save(); toast('已同步到云端'); } catch (error) { toast(error.message); } });
     $('cloud-reload').addEventListener('click', async () => { try { const data = await CloudClient.request('/data'); CloudClient.applyData(data); loadAccountCache(); showMonthView(); toast('已重新加载云端数据'); } catch (error) { toast(error.message); } });
     window.addEventListener('cloud-auth-changed', (event) => {
@@ -1717,7 +1855,6 @@
       $('account-login').hidden = logged;
       $('account-register').hidden = logged;
       $('account-logout').hidden = !logged;
-      $('account-password-field').hidden = logged;
       $('account-phone').readOnly = logged;
       if (logged) {
         $('account-phone').value = event.detail.username;
@@ -1725,6 +1862,7 @@
         if (account.name !== displayName) { account.name = displayName; saveAccountCache(); }
         $('account-name').value = displayName;
       }
+      renderAccountCredential();
       $('cloud-save').disabled = !logged;
       $('cloud-reload').disabled = !logged;
       renderAccountAvatar();
@@ -1768,10 +1906,15 @@
       toast(message);
     });
     $('file-input').addEventListener('change', (e) => {
-      const existing = pendingTask ? (state.groups[pendingTask.gi].tasks[pendingTask.ti].files || []) : [];
-      renderFileList([...new Set([...existing, ...[...e.target.files].map(file => file.name)])]);
+      if (!pendingTask) return;
+      const existing = state.groups[pendingTask.gi].tasks[pendingTask.ti].files || [];
+      const pending = [...e.target.files].map(file => ({ name: file.name, type: file.type, size: file.size, blob: file }));
+      renderFileList([...existing, ...pending]);
     });
     $('note-modal').addEventListener('click', (e) => { if (e.target === $('note-modal')) closeNote(); });
+    $('attachment-preview-close').addEventListener('click', closeAttachmentPreview);
+    $('attachment-preview').addEventListener('click', (event) => { if (event.target === $('attachment-preview')) closeAttachmentPreview(); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && $('attachment-preview').classList.contains('open')) closeAttachmentPreview(); });
     const bootstrap = async () => showMonthView();
     bootstrap();
   </script>
