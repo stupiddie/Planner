@@ -1,42 +1,38 @@
-CREATE DATABASE IF NOT EXISTS penguin_planner
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
+CREATE DATABASE IF NOT EXISTS penguin_planner CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE penguin_planner;
 
-CREATE TABLE IF NOT EXISTS plans (
+CREATE TABLE IF NOT EXISTS users (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  plan_date DATE NOT NULL,
-  story TEXT NOT NULL,
-  timeline JSON NULL,
-  saved_at DATETIME(3) NOT NULL,
+  username VARCHAR(120) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id), UNIQUE KEY users_username (username)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash CHAR(64) NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (token_hash), KEY sessions_user (user_id),
+  CONSTRAINT sessions_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS user_data (
+  user_id BIGINT UNSIGNED NOT NULL,
+  data_json JSON NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_plans_plan_date (plan_date)
+  PRIMARY KEY (user_id),
+  CONSTRAINT user_data_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS plan_groups (
-  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  plan_id BIGINT UNSIGNED NOT NULL,
-  name VARCHAR(255) NOT NULL DEFAULT '',
-  sort_order INT NOT NULL DEFAULT 0,
-  PRIMARY KEY (id),
-  KEY idx_plan_groups_plan_id (plan_id),
-  CONSTRAINT fk_plan_groups_plan
-    FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS tasks (
-  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  group_id BIGINT UNSIGNED NOT NULL,
-  text TEXT NOT NULL,
-  done BOOLEAN NOT NULL DEFAULT FALSE,
-  note TEXT NOT NULL,
-  files JSON NOT NULL,
-  sort_order INT NOT NULL DEFAULT 0,
-  PRIMARY KEY (id),
-  KEY idx_tasks_group_id (group_id),
-  CONSTRAINT fk_tasks_group
-    FOREIGN KEY (group_id) REFERENCES plan_groups(id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS user_files (
+  id CHAR(36) NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  mime VARCHAR(255) NOT NULL DEFAULT 'application/octet-stream',
+  content MEDIUMBLOB NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id), KEY user_files_user (user_id),
+  CONSTRAINT user_files_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;

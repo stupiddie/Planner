@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#111111" />
   <title>企鹅的每日计划</title>
+  <link rel="stylesheet" href="time-tracker.css">
+  <link rel="stylesheet" href="mainline.css">
   <style>
     :root {
       --ink: #161616;
@@ -48,16 +50,48 @@
     button, textarea, input { font: inherit; }
     button { cursor: pointer; }
     .app { width: min(1160px, calc(100% - 40px)); margin: 0 auto; padding: 34px 0 52px; position: relative; }
+    .menu-button { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: rgba(255,255,255,.7); font-size: 19px; line-height: 1; }
+    .menu-button:hover { background: #fff; }
     .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 34px; }
     .topbar-left { display: flex; align-items: center; gap: 10px; }
     .back-button { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: rgba(255,255,255,.6); font-size: 18px; line-height: 1; transition: background .2s, transform .2s; }
     .back-button:hover { background: #fff; transform: translateX(-2px); }
     .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .month-picker-wrap { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+    .month-picker-wrap[hidden] { display: none; }
+    .month-picker { border: 1px solid var(--line); border-radius: 99px; padding: 8px 12px; color: var(--ink); background: rgba(255,255,255,.65); outline: 0; font-size: 12px; }
+    .month-picker:focus { border-color: var(--ink); background: #fff; }
     .history-actions { display: flex; align-items: center; gap: 5px; }
+    .history-actions[hidden] { display: none; }
     .history-button { border: 1px solid var(--line); border-radius: 99px; color: #777773; background: rgba(255,255,255,.5); padding: 8px 11px; font-size: 12px; transition: background .2s, color .2s, border .2s; }
     .history-button:hover:not(:disabled) { color: var(--ink); border-color: #bdbdb9; background: #fff; }
     .history-button:disabled { color: #b8b8b4; background: rgba(255,255,255,.3); cursor: not-allowed; }
     .date-chip { color: var(--muted); font-size: 13px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 99px; background: rgba(255,255,255,.5); }
+    .sidebar-backdrop { position: fixed; inset: 0; z-index: 30; visibility: hidden; background: rgba(15,15,15,.2); opacity: 0; transition: opacity .25s, visibility .25s; }
+    .sidebar-backdrop.open { visibility: visible; opacity: 1; }
+    .sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: min(310px, 86vw); padding: 28px 20px; border-right: 1px solid rgba(255,255,255,.8); background: rgba(251,251,250,.96); box-shadow: 22px 0 60px rgba(20,20,20,.12); transform: translateX(-100%); transition: transform .32s cubic-bezier(.22,.61,.36,1); }
+    .sidebar-backdrop.open .sidebar { transform: translateX(0); }
+    .sidebar-brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 42px; }
+    .sidebar-brand strong { font-size: 17px; letter-spacing: -.04em; }
+    .sidebar-close { width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: transparent; font-size: 18px; line-height: 1; }
+    .sidebar-close:hover { color: var(--ink); background: var(--gray-surface); }
+    .sidebar-nav { display: grid; gap: 7px; }
+    .sidebar-nav button { display: flex; align-items: center; gap: 11px; width: 100%; border: 0; border-radius: 12px; padding: 12px 13px; color: #777773; background: transparent; text-align: left; font-size: 13px; }
+    .sidebar-nav button:hover, .sidebar-nav button.active { color: var(--ink); background: var(--gray-surface); }
+    .sidebar-nav-icon { width: 22px; color: inherit; font-size: 16px; text-align: center; }
+    .account-view { animation: slideIn .38s ease both; }
+    .account-panel { max-width: 760px; margin: 0 auto; padding: clamp(28px, 5vw, 56px); }
+    .account-header { display: grid; justify-items: center; gap: 18px; margin-bottom: 30px; text-align: center; }
+    .account-header h1, .account-header p { display: none; }
+    .account-avatar { width: 112px; height: 112px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 50%; color: #fff; background: var(--ink); font-size: 38px; font-weight: 700; }
+    .account-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .account-form { display: grid; gap: 18px; max-width: 430px; margin: 0 auto; }
+    .account-field { display: grid; gap: 8px; }
+    .account-field label { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+    .account-field input, .account-field textarea { width: 100%; border: 1px solid var(--line); border-radius: 14px; outline: 0; padding: 13px 15px; color: var(--ink); background: rgba(255,255,255,.65); font-size: 14px; }
+    .account-field input:focus { border-color: var(--ink); background: #fff; }
+    .account-avatar-upload { color: var(--muted); font-size: 12px; cursor: pointer; }
+    .account-avatar-upload:hover { color: var(--ink); }
 
     .layout { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(330px, .94fr); gap: 22px; align-items: start; }
     .editor-layout { display: block; }
@@ -157,13 +191,6 @@
     .month-hero h1 { max-width: 600px; margin: 0; font-size: clamp(34px, 5vw, 60px); letter-spacing: -.06em; line-height: 1.08; }
     .month-hero h1 em { color: #a3a3a0; font-style: normal; }
     .month-hero p { max-width: 520px; margin: 16px 0 0; color: var(--muted); font-size: 14px; line-height: 1.8; }
-    .month-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
-    .month-toolbar-center { display: flex; align-items: center; gap: 11px; }
-    .month-toolbar h2 { min-width: 126px; margin: 0; text-align: center; font-size: 17px; letter-spacing: -.03em; }
-    .month-nav { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: rgba(255,255,255,.65); color: var(--ink); font-size: 16px; }
-    .month-nav:hover { background: #fff; }
-    .today-button { border: 1px solid var(--line); border-radius: 99px; padding: 8px 13px; color: #777773; background: rgba(255,255,255,.55); font-size: 12px; }
-    .today-button:hover { color: var(--ink); background: #fff; }
     .month-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
     .plan-card { position: relative; min-height: 140px; padding: 28px; border: 1px solid rgba(255,255,255,.85); border-radius: var(--radius-lg); background: rgba(255,255,255,.76); box-shadow: 0 15px 35px rgba(20,20,20,.06); cursor: pointer; transition: transform .2s, box-shadow .2s, border .2s; }
     .plan-card:hover { border-color: #c8c8c4; transform: translateY(-3px); box-shadow: 0 20px 42px rgba(20,20,20,.11); }
@@ -176,7 +203,7 @@
     .plan-card-menu button { border: 0; border-radius: 8px; padding: 8px 10px; color: #696966; background: transparent; font-size: 12px; white-space: nowrap; }
     .plan-card-menu button:hover { color: var(--ink); background: var(--gray-surface); }
     .plan-card h3, .plan-card-meta, .plan-card-progress, .plan-card-groups { display: none; }
-    .month-empty { grid-column: 1 / -1; min-height: 220px; display: grid; place-items: center; padding: 40px; border: 1px dashed #c8c8c4; border-radius: var(--radius-xl); color: #a3a39f; font-size: 13px; line-height: 1.8; text-align: center; }
+    .month-empty { grid-column: 1 / -1; min-height: 220px; height: 220px; display: grid; place-items: center; padding: 40px; border: 1px dashed #c8c8c4; border-radius: var(--radius-xl); color: #a3a39f; font-size: 13px; line-height: 1.8; text-align: center; }
     .date-picker-row { display: flex; align-items: center; gap: 10px; margin-top: 25px; color: var(--muted); font-size: 12px; }
     .date-picker-row label { white-space: nowrap; }
     .plan-date-input { border: 1px solid var(--line); border-radius: 99px; padding: 9px 12px; color: var(--ink); background: rgba(255,255,255,.7); outline: 0; font-size: 13px; }
@@ -189,6 +216,69 @@
     .today-grid .plan-card, .tomorrow-grid .plan-card { min-height: 140px; }
     .history-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .history-empty { min-height: 120px; }
+
+    .mainline-section { margin-top: 8px; padding: 25px 26px 27px; border: 1px solid rgba(255,255,255,.9); border-radius: var(--radius-xl); background: rgba(255,255,255,.68); box-shadow: 0 15px 35px rgba(20,20,20,.05); overflow: hidden; }
+    .mainline-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .mainline-kicker { margin: 0 0 8px; color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .16em; }
+    .mainline-head h2 { margin: 0; font-size: 24px; letter-spacing: -.045em; }
+    .mainline-head p { max-width: 510px; margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .mainline-add { flex: 0 0 auto; border: 1px solid var(--ink); border-radius: 99px; padding: 10px 14px; color: #fff; background: var(--ink); font-size: 12px; font-weight: 650; }
+    .mainline-add:hover { background: #333; }
+    .mainline-track-wrap { position: relative; margin: 29px -2px 0; overflow-x: auto; padding: 0 2px 7px; scrollbar-width: thin; }
+    .mainline-track { position: relative; display: flex; gap: 14px; min-width: max-content; padding: 0 2px 2px; }
+    .mainline-track::before { content: ""; position: absolute; left: 16px; right: 16px; top: 18px; height: 2px; border-radius: 99px; background: #d5d5d1; }
+    .mainline-milestone { position: relative; z-index: 1; width: 194px; padding-top: 0; }
+    .mainline-dot { width: 11px; height: 11px; margin: 13px 0 14px 12px; border: 3px solid #fff; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+    .mainline-milestone.done .mainline-dot { background: #a4a49f; box-shadow: 0 0 0 1px #a4a49f; }
+    .mainline-card { position: relative; min-height: 116px; padding: 15px 15px 14px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.9); box-shadow: 0 7px 18px rgba(20,20,20,.05); cursor: pointer; transition: transform .2s, border .2s, box-shadow .2s; }
+    .mainline-card:hover { transform: translateY(-3px); border-color: #b8b8b4; box-shadow: 0 12px 25px rgba(20,20,20,.1); }
+    .mainline-card-date { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .mainline-card h3 { margin: 8px 23px 0 0; font-size: 15px; line-height: 1.4; letter-spacing: -.02em; }
+    .mainline-card p { margin: 7px 0 0; color: #777773; font-size: 11px; line-height: 1.5; }
+    .mainline-milestone.done h3 { color: #9d9d99; text-decoration: line-through; }
+    .mainline-check { position: absolute; top: 13px; right: 13px; width: 20px; height: 20px; border: 1px solid #c7c7c3; border-radius: 50%; color: transparent; background: #fff; font-size: 11px; line-height: 1; }
+    .mainline-check:hover { border-color: var(--ink); }
+    .mainline-milestone.done .mainline-check { border-color: var(--ink); color: #fff; background: var(--ink); }
+    .mainline-delete { position: absolute; right: 12px; bottom: 10px; border: 0; padding: 0; color: #aaa9a5; background: transparent; font-size: 14px; opacity: 0; }
+    .mainline-card:hover .mainline-delete { opacity: 1; }
+    .mainline-delete:hover { color: var(--ink); }
+    .mainline-empty { padding: 20px 0 5px; color: var(--muted); font-size: 12px; }
+    .mainline-progress { display: flex; align-items: center; gap: 9px; margin-top: 17px; color: var(--muted); font-size: 11px; }
+    .mainline-progress-track { width: 110px; height: 5px; overflow: hidden; border-radius: 99px; background: #dededb; }
+    .mainline-progress-bar { height: 100%; border-radius: inherit; background: var(--ink); transition: width .25s; }
+    .mainline-section.timeline-mode { padding-bottom: 22px; }
+    .timeline-day { position: relative; height: 260px; margin-top: 28px; overflow-x: auto; overflow-y: hidden; border-bottom: 1px solid var(--line); scrollbar-width: thin; }
+    .timeline-day:empty { display: none; }
+    .timeline-canvas { position: relative; width: 1440px; min-height: 240px; }
+    .timeline-line { position: absolute; left: 0; right: 0; height: 2px; border-radius: 99px; background: #d5d5d1; }
+    .timeline-dot { position: absolute; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px #fff, 0 0 0 4px var(--ink); transform: translateX(-50%); }
+    .timeline-dot.done { background: #a4a49f; box-shadow: 0 0 0 3px #fff, 0 0 0 4px #a4a49f; }
+    .timeline-task-card { position: absolute; width: 148px; height: 120px; overflow: visible; box-sizing: border-box; padding: 9px 27px 28px 11px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: #fff; box-shadow: 0 6px 16px rgba(20,20,20,.07); cursor: pointer; transform: translateX(-50%); transition: border-color .2s, box-shadow .2s, background .2s; will-change: transform, opacity; }
+    .timeline-task-card::after { content: ""; position: absolute; left: 50%; width: 1px; height: 14px; background: #cfcfcb; transform: translateX(-50%); }
+    .timeline-task-card-top::after { top: 100%; }
+    .timeline-task-card-bottom::after { bottom: 100%; }
+    .timeline-task-card:hover { border-color: #b8b8b4; box-shadow: 0 9px 20px rgba(20,20,20,.11); }
+    .timeline-task-card.done { color: #9e9e9a; background: #f5f5f3; }
+    .timeline-task-card.done .timeline-task-card-text { text-decoration: line-through; }
+    .timeline-task-card-text { display: block; max-height: 82px; overflow-y: auto; padding-right: 2px; font-size: 12px; line-height: 1.4; }
+    .timeline-task-delete { position: absolute; top: auto; right: 9px; bottom: 8px; width: 17px; height: 17px; border: 0; border-radius: 50%; padding: 0; color: #aaa9a5; background: transparent; font-size: 14px; line-height: 1; }
+    .timeline-task-delete:hover { color: var(--ink); background: transparent; }
+    .timeline-unscheduled { margin-top: 10px; color: var(--muted); font-size: 11px; }
+    .timeline-unscheduled strong { color: var(--ink); font-weight: 650; }
+    .timeline-focus-overlay { position: fixed; z-index: 20; overflow: hidden; border: 1px solid rgba(255,255,255,.92); border-radius: var(--radius-xl); background: rgba(255,255,255,.96); box-shadow: 0 28px 90px rgba(20,20,20,.22); perspective: 1200px; }
+    .timeline-focus-front, .timeline-focus-panel { position: absolute; inset: 0; backface-visibility: hidden; }
+    .timeline-focus-front { display: grid; align-content: center; padding: 30px; }
+    .timeline-focus-front .plan-card-date { color: var(--muted); font-size: 24px; font-weight: 750; }
+    .timeline-focus-front h3 { max-width: 520px; margin: 12px 0 0; font-size: clamp(24px, 4vw, 46px); line-height: 1.12; letter-spacing: -.05em; }
+    .timeline-focus-panel { display: none; flex-direction: column; padding: 28px 30px 24px; transform: rotateY(-90deg); }
+    .timeline-focus-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .timeline-focus-header p { margin: 7px 0 0; color: var(--muted); font-size: 12px; }
+    .timeline-focus-close { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: rgba(255,255,255,.75); font-size: 18px; line-height: 1; }
+    .timeline-focus-close:hover { background: var(--gray-surface); }
+    .timeline-focus-panel .timeline-day { flex: 1; min-height: 230px; margin-top: 25px; }
+    .timeline-focus-panel .timeline-unscheduled { margin-top: 10px; }
+    .timeline-focus-panel .mainline-progress { margin-top: 15px; }
+    .timeline-source-hidden { visibility: hidden; }
 
     .checklist-view { animation: slideIn .38s ease both; }
     .checklist-panel { max-width: 820px; margin: 0 auto; padding: clamp(28px, 5vw, 52px); }
@@ -237,6 +327,9 @@
       .month-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .history-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .checklist-header { flex-direction: column; }
+      .mainline-section { padding: 21px 18px 23px; }
+      .mainline-head { flex-direction: column; }
+      .mainline-add { align-self: flex-start; }
     }
     @media (max-width: 440px) {
       .date-chip { padding: 7px 10px; font-size: 11px; }
@@ -247,19 +340,31 @@
       .primary, .secondary { width: 100%; }
       .month-grid { grid-template-columns: 1fr; }
       .history-grid { grid-template-columns: 1fr; }
-      .month-toolbar h2 { min-width: 105px; }
     }
   </style>
 </head>
 <body>
+  <div class="sidebar-backdrop" id="sidebar-backdrop">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="sidebar-brand"><strong>企鹅的每日计划</strong><button class="sidebar-close" id="sidebar-close" type="button" aria-label="关闭导航">×</button></div>
+      <nav class="sidebar-nav">
+        <button id="nav-daily" class="active" type="button"><span class="sidebar-nav-icon">□</span><span>每日</span></button>
+        <button id="nav-mainline" type="button"><span class="sidebar-nav-icon">⌁</span><span>主线</span></button>
+        <button id="nav-time" type="button"><span class="sidebar-nav-icon">◷</span><span>时间</span></button>
+        <button id="nav-account" type="button"><span class="sidebar-nav-icon">○</span><span>账户</span></button>
+      </nav>
+    </aside>
+  </div>
   <main class="app">
     <header class="topbar">
       <div class="topbar-left">
+        <button class="menu-button" id="sidebar-toggle" type="button" title="打开导航" aria-label="打开导航">☰</button>
         <button class="back-button" id="back-to-month" title="返回月度视角" aria-label="返回月度视角">←</button>
         <div class="date-chip" id="today"></div>
       </div>
       <div class="topbar-right">
-        <div class="history-actions" aria-label="历史操作">
+        <label class="month-picker-wrap" id="month-picker-wrap" hidden><span>月份</span><input class="month-picker" id="month-picker" type="month" aria-label="选择月份"></label>
+        <div class="history-actions" id="history-actions" aria-label="历史操作">
           <button class="history-button" id="undo-action" disabled title="撤回上一步">↶ 撤回上一步</button>
           <button class="history-button" id="redo-action" disabled title="回到下一步">↷ 回到下一步</button>
         </div>
@@ -310,28 +415,70 @@
 
     <section class="month-view" id="month-view" hidden>
       <div class="month-hero">
-        <div class="eyebrow">MONTHLY VIEW / 每日记录</div>
         <h1>把每一天，<br><em>留成一张计划名片。</em></h1>
-        <p>这里会收好你保存过的每一日计划。点击卡片，可以重新打开那天的事项和备注。</p>
       </div>
-      <div class="month-toolbar">
-        <div class="month-toolbar-center">
-          <h2>全部历史日期</h2>
-        </div>
-        <button class="today-button" id="new-today-plan">＋ 添加新的计划</button>
-      </div>
-      <section class="home-section">
+      <section class="home-section" id="today-section">
         <div class="home-section-head"><h2>今天</h2><span>最优先照顾好今天</span></div>
         <div class="month-grid today-grid" id="today-grid"></div>
       </section>
-      <section class="home-section">
+      <section class="home-section" id="tomorrow-section">
         <div class="home-section-head"><h2>明天</h2><span>提前安排下一步</span></div>
         <div class="month-grid tomorrow-grid" id="tomorrow-grid"></div>
       </section>
-      <section class="home-section">
-        <div class="home-section-head"><h2>历史计划</h2><span id="history-count"></span></div>
+      <section class="home-section" id="history-section">
+        <div class="home-section-head"><h2 id="history-title">历史计划</h2><span id="history-count"></span></div>
         <div class="month-grid history-grid" id="history-grid"></div>
       </section>
+    </section>
+
+    <section id="mainline-view" hidden aria-label="主线任务">
+      <div id="mainline-home">
+        <div class="ml-hero"><div class="eyebrow">MAINLINE / 主线</div><h1>沿着主线，<br>慢慢走向想去的地方。</h1><p>把长远的目标，放进每一天。</p></div>
+        <form id="mainline-create" class="ml-create"><input id="mainline-name" placeholder="一条新的主线" aria-label="主线名称" maxlength="60" required><button class="primary" type="submit">＋ 新增主线</button></form>
+        <div id="mainline-cards" class="ml-spine"></div>
+      </div>
+      <div id="mainline-detail" hidden>
+        <button id="mainline-back" class="secondary" type="button">← 所有主线</button>
+        <header class="ml-detail-heading"><div class="eyebrow">MAINLINE / 主线</div><h1 id="mainline-title"></h1><p class="hint">在每日任务中输入 <span id="mainline-tag"></span>，留下这条主线的足迹。</p></header>
+        <nav class="ml-tabs" aria-label="主线内容"><button type="button" data-ml-tab="goals" class="active" aria-pressed="true">目标</button><button type="button" data-ml-tab="achievements" aria-pressed="false">成就</button><button type="button" data-ml-tab="logs" aria-pressed="false">任务日志</button></nav>
+        <section id="ml-goals"><div class="ml-section-heading"><h2>一步步，靠近目标。</h2><button id="ml-add-goal" class="secondary" type="button">＋ 添加目标</button></div><div id="ml-goal-list"></div></section>
+        <section id="ml-achievements" hidden><div class="ml-section-heading"><h2>值得记住的时刻。</h2><button id="ml-add-achievement" class="secondary" type="button">＋ 添加成就</button></div><div id="ml-achievement-list"></div></section>
+        <section id="ml-logs" hidden><div class="ml-section-heading"><h2>每一天，都算数。</h2><span class="hint">与每日任务同步</span></div><div id="ml-log-list"></div></section>
+        <p id="ml-save-status" class="hint" role="status"></p>
+      </div>
+    </section>
+
+    <section id="time-view" hidden>
+      <div id="time-list">
+        <div class="time-heading"><div><div class="eyebrow">TIME / 时间记录</div><h1>把时间，留给重要的事。</h1></div></div>
+        <form id="time-create" class="time-create"><input id="time-name" maxlength="80" placeholder="输入事项名称" aria-label="事项名称" required><button class="primary" type="submit">＋ 新增事项</button></form>
+        <div id="time-cards" class="time-cards"></div>
+      </div>
+      <div id="time-detail" hidden>
+        <button id="time-back" class="secondary" type="button">← 返回事项</button>
+        <div class="panel time-panel"><h1 id="time-title"></h1><p id="time-status" role="status"></p><div id="time-clock" class="time-clock">00:00:00</div>
+          <div class="time-controls"><button id="time-start" class="primary" type="button">开始</button><button id="time-pause" class="secondary" type="button" aria-describedby="time-help">暂停</button></div>
+          <p id="time-help" class="hint">点击暂停，保留累计时间；长按暂停 0.8 秒，结束本次计时。键盘可长按空格。</p>
+        </div>
+        <div class="time-heading"><h2>时间记录</h2><span id="time-total" class="hint"></span></div><div id="time-records"></div>
+      </div>
+    </section>
+
+    <section class="account-view" id="account-view" hidden>
+      <div class="panel account-panel">
+        <div class="account-header">
+          <div class="account-avatar" id="account-avatar">P</div>
+          <label class="account-avatar-upload" for="account-avatar-input">更换头像</label>
+          <input id="account-avatar-input" type="file" accept="image/*" hidden>
+        </div>
+        <div class="account-form">
+          <div class="account-field"><label for="account-phone">账户名</label><input id="account-phone" type="text" autocomplete="username" placeholder="手机号或用户名"></div>
+          <div class="account-field" id="account-password-field"><label for="account-password">密码</label><input id="account-password" type="password" autocomplete="current-password" placeholder="至少 8 个字符"></div>
+          <div class="actions account-actions"><button class="primary" id="account-login" type="button">登录</button><button class="secondary" id="account-register" type="button">注册</button><button class="secondary" id="account-logout" type="button" hidden>退出登录</button></div>
+          <div class="account-actions"><button class="secondary" id="save-account" type="button">保存头像</button><button class="secondary" id="cloud-save" type="button" disabled>手动保存云端数据</button><button class="secondary" id="cloud-import" type="button" disabled>导入本机旧数据</button><button class="secondary" id="cloud-reload" type="button" disabled>重新加载云端数据</button></div>
+          <p class="hint" id="cloud-status">未登录，数据仅保存在本机</p>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -350,9 +497,12 @@
   </div>
   <div class="toast" id="toast">已保存</div>
 
+  <script src="vendor/gsap.min.js"></script>
+  <script src="cloud.js"></script>
   <script>
     const STORAGE_KEY = 'penguin-daily-plan-v1';
     const ARCHIVE_KEY = 'penguin-daily-plans-v1';
+    const ACCOUNT_KEY = 'penguin-planner-local-account-v1';
     const $ = (id) => document.getElementById(id);
     const dateKey = (date = new Date()) => {
       const year = date.getFullYear();
@@ -361,9 +511,13 @@
       return `${year}-${month}-${day}`;
     };
     const todayKey = dateKey();
+    let account = (() => { try { const raw = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null'); return { avatar: typeof raw?.avatar === 'string' ? raw.avatar : '' }; } catch (error) { return { avatar: '' }; } })();
+    const storageKey = (base) => `${base}:local`;
+    [STORAGE_KEY, ARCHIVE_KEY].forEach((base) => { if (!localStorage.getItem(storageKey(base)) && localStorage.getItem(base)) localStorage.setItem(storageKey(base), localStorage.getItem(base)); });
     const TIMELINE_COLORS = ['#ffffff', '#f2f2f0', '#e7e7e4', '#d9d9d6', '#c9c9c5', '#b9b9b5'];
     const isTimelineColor = value => typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
     const blankState = (date = todayKey) => ({ date, story: '', timeline: [], groups: [{ name: '', tasks: [{ text: '', done: false, note: '', files: [] }] }] });
+    const makeStableId = () => window.crypto?.randomUUID?.() || `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const normalizePlanState = (source, fallbackDate = todayKey) => {
       const raw = source && typeof source === 'object' ? JSON.parse(JSON.stringify(source)) : blankState(fallbackDate);
       const normalized = { ...raw, date: raw.date || fallbackDate, story: typeof raw.story === 'string' ? raw.story : '', timeline: [], groups: [] };
@@ -376,10 +530,14 @@
         color: isTimelineColor(event?.color) ? event.color : TIMELINE_COLORS[0]
       })).filter(event => event.start >= 0 && event.end <= 1440 && event.end > event.start);
       normalized.groups = (raw.groups || []).map(group => ({
+        id: group?.id || makeStableId(),
         name: typeof group?.name === 'string' ? group.name : '',
         tasks: (group?.tasks || []).map(task => ({
+          id: task?.id || makeStableId(),
           text: typeof task?.text === 'string' ? task.text : '',
           done: Boolean(task?.done),
+          start: Number.isInteger(task?.start) && task.start >= 0 && task.start <= 1440 ? task.start : null,
+          end: Number.isInteger(task?.end) && task.end >= 0 && task.end <= 1440 ? task.end : null,
           note: typeof task?.note === 'string' ? task.note : '',
           files: Array.isArray(task?.files) ? task.files.map(file => typeof file === 'string' ? ({ id: '', name: file, type: '', size: 0 }) : ({
             id: file?.id || '', name: file?.name || '未命名文件', type: file?.type || '', size: Number(file?.size) || 0
@@ -389,24 +547,30 @@
       if (!normalized.groups.length) normalized.groups = blankState(normalized.date).groups;
       return normalized;
     };
-    let state = normalizePlanState(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'));
+    let state = normalizePlanState(JSON.parse(localStorage.getItem(storageKey(STORAGE_KEY)) || 'null'));
     let activeDate = state.date || todayKey;
     let monthCursor = new Date(`${activeDate}T12:00:00`);
-    let savedPlans = (JSON.parse(localStorage.getItem(ARCHIVE_KEY) || '[]') || []).map(plan => normalizePlanState(plan, plan?.date || todayKey));
+    let savedPlans = (JSON.parse(localStorage.getItem(storageKey(ARCHIVE_KEY)) || '[]') || []).map(plan => normalizePlanState(plan, plan?.date || todayKey));
     const currentHasContent = state.story.trim() || state.groups.some(group => group.tasks.some(task => task.text.trim()));
     if (currentHasContent && !savedPlans.some(plan => plan.date === activeDate)) {
       savedPlans.push(normalizePlanState(state, activeDate));
-      localStorage.setItem(ARCHIVE_KEY, JSON.stringify(savedPlans));
+      localStorage.setItem(storageKey(ARCHIVE_KEY), JSON.stringify(savedPlans));
     }
     let pendingTask = null;
+    let pendingAvatar = account.avatar || '';
     const HISTORY_LIMIT = 50;
     let historyPast = [];
     let historyFuture = [];
     let editSnapshot = null;
     let newPlanMode = false;
-    const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
-
-    const persist = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const persist = () => { state.groups.forEach(g => { g.id ||= makeStableId(); g.tasks.forEach(t => { t.id ||= makeStableId(); }); }); localStorage.setItem(storageKey(STORAGE_KEY), JSON.stringify(state)); };
+    const persistArchive = () => localStorage.setItem(storageKey(ARCHIVE_KEY), JSON.stringify(savedPlans));
+    const loadAccountCache = () => {
+      state = normalizePlanState(JSON.parse(localStorage.getItem(storageKey(STORAGE_KEY)) || 'null'));
+      activeDate = state.date || todayKey;
+      monthCursor = new Date(`${activeDate}T12:00:00`);
+      savedPlans = (JSON.parse(localStorage.getItem(storageKey(ARCHIVE_KEY)) || '[]') || []).map(plan => normalizePlanState(plan, plan?.date || todayKey));
+    };
     const toast = (message) => { $('toast').textContent = message; $('toast').classList.add('show'); setTimeout(() => $('toast').classList.remove('show'), 1800); };
     const cloneState = (value = state) => JSON.parse(JSON.stringify(value));
     const sameState = (left, right) => JSON.stringify(left) === JSON.stringify(right);
@@ -416,21 +580,138 @@
       const done = tasks.filter(task => task.done).length;
       return { total: tasks.length, done, progress: tasks.length ? Math.round(done / tasks.length * 100) : 0 };
     };
-    const persistArchive = () => localStorage.setItem(ARCHIVE_KEY, JSON.stringify(savedPlans));
-    const apiRequest = async (path, options = {}) => {
-      const response = await fetch(`${API_BASE}/api${path}`, {
-        ...options,
-        headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) }
+    const todayPlanForTimeline = () => savedPlans.find(plan => plan.date === todayKey) || (activeDate === todayKey ? state : null);
+    let activeTimelineOverlay = null;
+    const renderTimeline = (day, plan = todayPlanForTimeline()) => {
+      if (!day) return;
+      const tasks = (plan?.groups || []).flatMap(group => group.tasks).filter(task => task.text.trim());
+      const completed = tasks.filter(task => task.done).length;
+      const progressLabel = day.parentElement?.querySelector('.mainline-progress-label');
+      const progressBar = day.parentElement?.querySelector('.mainline-progress-bar');
+      const unscheduledBox = day.parentElement?.querySelector('.timeline-unscheduled');
+      if (progressLabel) progressLabel.textContent = tasks.length ? `${completed} / ${tasks.length} 项任务完成` : '今天还没有任务';
+      if (progressBar) progressBar.style.width = tasks.length ? `${Math.round(completed / tasks.length * 100)}%` : '0%';
+      day.innerHTML = '';
+      const canvas = document.createElement('div');
+      canvas.className = 'timeline-canvas';
+      day.appendChild(canvas);
+      const activeTasks = tasks.filter(task => !task.done);
+      if (unscheduledBox) unscheduledBox.innerHTML = '';
+      const CARD_WIDTH = 148;
+      const CARD_MAX_H = 120;
+      const GAP = 18;
+      const AXIS_GAP = 14;
+      const width = Math.max(1440, activeTasks.length * (CARD_WIDTH + GAP) + 12);
+      canvas.style.width = `${width}px`;
+      const syncTimeline = (render = true) => {
+        const currentPlan = activeTimelineOverlay?.plan || todayPlanForTimeline();
+        if (currentPlan === state) {
+          persist();
+          syncArchivedPlan();
+          renderTaskBuilder();
+          updateSummary();
+        } else if (currentPlan) {
+          persistArchive();
+          persistArchive();
+        }
+        if (render) refreshTimelineViews();
+      };
+      const animateTaskCompletion = (task, card) => {
+        task.done = true;
+        syncTimeline(false);
+        if (!card || !window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          refreshTimelineViews();
+          return;
+        }
+        card.classList.add('timeline-task-card-completing');
+        card.style.pointerEvents = 'none';
+        gsap.timeline({ onComplete: () => refreshTimelineViews() })
+          .to(card, { y: 18, rotation: 2, scale: .98, duration: .16, ease: 'power2.out' })
+          .to(card, { y: 210, rotation: 9, scale: .82, opacity: 0, duration: .62, ease: 'power3.in' });
+      };
+      const toggleDone = (task, card) => {
+        if (task.done) { task.done = false; syncTimeline(); return; }
+        animateTaskCompletion(task, card);
+      };
+      const removeTask = (task) => {
+        const plan = activeTimelineOverlay?.plan || todayPlanForTimeline();
+        if (!plan) return;
+        if (plan === state) recordHistory();
+        for (let gi = plan.groups.length - 1; gi >= 0; gi -= 1) {
+          const ti = plan.groups[gi].tasks.indexOf(task);
+          if (ti === -1) continue;
+          plan.groups[gi].tasks.splice(ti, 1);
+          if (!plan.groups[gi].tasks.length) plan.groups.splice(gi, 1);
+          break;
+        }
+        syncTimeline();
+        toast('已删除该事项');
+      };
+      const placements = activeTasks.map((task, index) => {
+        const rawX = CARD_WIDTH / 2 + 6 + index * (CARD_WIDTH + GAP);
+        return { task, x: rawX, side: index % 2 ? 'bottom' : 'top' };
       });
-      if (!response.ok) {
-        let message = `API 请求失败：${response.status}`;
-        try { message = (await response.json()).error || message; } catch (error) { /* keep status message */ }
-        throw new Error(message);
-      }
-      return response.status === 204 ? null : response.json();
+      const lineY = CARD_MAX_H + AXIS_GAP;
+      const dayHeight = lineY + 2 + AXIS_GAP + CARD_MAX_H;
+      day.style.height = `${Math.max(260, dayHeight)}px`;
+      canvas.style.height = `${Math.max(240, dayHeight)}px`;
+      const line = document.createElement('div');
+      line.className = 'timeline-line';
+      line.style.top = `${lineY}px`;
+      canvas.appendChild(line);
+      placements.forEach(({ task, x, side }) => {
+        const dot = document.createElement('span');
+        dot.className = `timeline-dot${task.done ? ' done' : ''}`;
+        dot.style.left = `${x}px`;
+        line.appendChild(dot);
+        const card = document.createElement('div');
+        card.className = `timeline-task-card timeline-task-card-${side}${task.done ? ' done' : ''}`;
+        card.style.left = `${x}px`;
+        if (side === 'top') card.style.bottom = `${dayHeight - lineY + AXIS_GAP}px`;
+        else card.style.top = `${lineY + 2 + AXIS_GAP}px`;
+        card.innerHTML = `<span class="timeline-task-card-text">${escapeHtml(task.text)}</span><button class="timeline-task-delete" type="button" title="删除事项" aria-label="删除事项">×</button>`;
+        card.addEventListener('click', (event) => { if (event.target.closest('button')) return; toggleDone(task, card); });
+        card.querySelector('.timeline-task-delete').addEventListener('click', () => removeTask(task));
+        canvas.appendChild(card);
+      });
     };
-    const savePlanToApi = (plan) => apiRequest(`/plans/${encodeURIComponent(plan.date)}`, { method: 'PUT', body: JSON.stringify(plan) });
-    const deletePlanFromApi = (date) => apiRequest(`/plans/${encodeURIComponent(date)}`, { method: 'DELETE' });
+    const refreshTimelineViews = () => {
+      if (activeTimelineOverlay) renderTimeline(activeTimelineOverlay.day, activeTimelineOverlay.plan);
+    };
+    const closeTimelineOverlay = () => {
+      if (!activeTimelineOverlay) return;
+      const current = activeTimelineOverlay;
+      activeTimelineOverlay = null;
+      const { overlay, source, origin } = current;
+      const front = overlay.querySelector('.timeline-focus-front');
+      const panel = overlay.querySelector('.timeline-focus-panel');
+      gsap.timeline({ onComplete: () => { overlay.remove(); source.classList.remove('timeline-source-hidden'); } })
+        .to(panel, { rotationY: 90, opacity: 0, duration: .24, ease: 'power2.in' })
+        .set(front, { display: 'grid' })
+        .fromTo(front, { rotationY: -90, opacity: 0 }, { rotationY: 0, opacity: 1, duration: .24, ease: 'power2.out' })
+        .to(overlay, { left: origin.left, top: origin.top, width: origin.width, height: origin.height, duration: .48, ease: 'power3.inOut' }, '<');
+    };
+    const openTimelineOverlay = (plan, source) => {
+      if (activeTimelineOverlay || !window.gsap) return;
+      const origin = source.getBoundingClientRect();
+      const overlay = document.createElement('section');
+      overlay.className = 'timeline-focus-overlay';
+      overlay.innerHTML = `<div class="timeline-focus-front"><div class="plan-card-date">${escapeHtml(formatDate(plan.date))}</div><h3>${escapeHtml(plan.story.trim() || '今日任务时间轴')}</h3></div><div class="timeline-focus-panel"><div class="timeline-focus-header"><div><div class="mainline-kicker">TODAY / 今日时间轴</div><p>点击任务卡片即可标记完成，完成后会从时间轴上落下消失。</p></div><button class="timeline-focus-close" type="button" aria-label="关闭时间轴">×</button></div><div class="timeline-day"></div><div class="timeline-unscheduled"></div><div class="mainline-progress"><span class="mainline-progress-label"></span><div class="mainline-progress-track"><div class="mainline-progress-bar"></div></div></div></div>`;
+      document.body.appendChild(overlay);
+      const panel = overlay.querySelector('.timeline-focus-panel');
+      const day = overlay.querySelector('.timeline-day');
+      activeTimelineOverlay = { overlay, source, origin, day, plan };
+      source.classList.add('timeline-source-hidden');
+      gsap.set(overlay, { left: origin.left, top: origin.top, width: origin.width, height: origin.height, transformPerspective: 1200 });
+      gsap.timeline()
+        .to(overlay, { left: '7vw', top: '7vh', width: '86vw', height: '86vh', duration: .58, ease: 'power3.inOut' }, 0)
+        .to(overlay.querySelector('.timeline-focus-front'), { rotationY: 90, opacity: 0, duration: .26, ease: 'power2.in' }, .18)
+        .set(overlay.querySelector('.timeline-focus-front'), { display: 'none' })
+        .set(panel, { display: 'flex' })
+        .fromTo(panel, { rotationY: -90, opacity: 0 }, { rotationY: 0, opacity: 1, duration: .32, ease: 'power2.out' }, .42)
+        .call(() => renderTimeline(day, plan));
+      overlay.querySelector('.timeline-focus-close').addEventListener('click', closeTimelineOverlay);
+    };
     const saveCurrentPlan = async () => {
       state.date = activeDate;
       const snapshot = normalizePlanState(state, activeDate);
@@ -440,7 +721,6 @@
       else savedPlans[index] = snapshot;
       persistArchive();
       persist();
-      await savePlanToApi(snapshot);
     };
     const syncArchivedPlan = () => {
       const index = savedPlans.findIndex(plan => plan.date === activeDate);
@@ -449,14 +729,23 @@
       savedPlans[index] = normalizePlanState(state, activeDate);
       savedPlans[index].savedAt = savedAt;
       persistArchive();
-      savePlanToApi(savedPlans[index]).catch(error => console.error('同步计划失败', error));
     };
     const renderPlanCard = (plan, target) => {
         const stats = planStats(plan);
         const card = document.createElement('article'); card.className = 'plan-card'; card.tabIndex = 0; card.setAttribute('role', 'button'); card.setAttribute('aria-label', `打开 ${formatDate(plan.date)} 的计划`);
         const cardTitle = plan.story.trim() || plan.groups.filter(group => group.name.trim()).map(group => group.name.trim()).join('、') || '未命名计划';
         card.innerHTML = `<div class="plan-card-top"><div class="plan-card-date">${formatDate(plan.date)}</div><button class="plan-card-menu-toggle" title="更多操作" aria-label="更多操作">···</button></div><div class="plan-card-menu"><button class="delete-plan-card">删除该事项</button></div><h3>${escapeHtml(cardTitle)}</h3><div class="plan-card-meta"><span>${stats.done}/${stats.total} 件完成</span><span>${stats.progress}%</span></div><div class="plan-card-progress"><span style="width:${stats.progress}%"></span></div>`;
-        card.addEventListener('click', () => openSavedPlan(plan));
+        let clickTimer = null;
+        card.addEventListener('click', (event) => {
+          if (event.target.closest('.plan-card-menu-toggle, .plan-card-menu')) return;
+          clearTimeout(clickTimer);
+          clickTimer = setTimeout(() => openSavedPlan(plan), 250);
+        });
+        card.addEventListener('dblclick', (event) => {
+          event.preventDefault();
+          clearTimeout(clickTimer);
+          openTimelineOverlay(plan, card);
+        });
         card.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openSavedPlan(plan); } });
         card.querySelector('.plan-card-menu-toggle').addEventListener('click', (event) => { event.stopPropagation(); document.querySelectorAll('.plan-card.menu-open').forEach(openCard => { if (openCard !== card) openCard.classList.remove('menu-open'); }); card.classList.toggle('menu-open'); });
         card.querySelector('.delete-plan-card').addEventListener('click', (event) => {
@@ -468,27 +757,35 @@
             state = blankState(plan.date);
             persist();
           }
-          deletePlanFromApi(plan.date).catch(error => console.error('删除数据库计划失败', error));
           renderMonth();
           toast('已删除该事项');
         });
         target.appendChild(card);
     };
+    const monthInputValue = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const renderMonth = () => {
       const todayGrid = $('today-grid'); const tomorrowGrid = $('tomorrow-grid'); const historyGrid = $('history-grid');
       todayGrid.innerHTML = ''; tomorrowGrid.innerHTML = ''; historyGrid.innerHTML = '';
-      const todayPlan = savedPlans.find(plan => plan.date === todayKey);
-      if (todayPlan) renderPlanCard(todayPlan, todayGrid);
-      else {
+      const picker = $('month-picker');
+      const selectedMonth = picker.value || monthInputValue(monthCursor);
+      if (!picker.value) picker.value = selectedMonth;
+      monthCursor = new Date(`${selectedMonth}-01T12:00:00`);
+      const currentMonth = selectedMonth === todayKey.slice(0, 7);
+      $('today-section').hidden = !currentMonth;
+      $('tomorrow-section').hidden = !currentMonth;
+      const selectedPlans = savedPlans.filter(plan => plan.date.slice(0, 7) === selectedMonth);
+      const todayPlan = currentMonth ? selectedPlans.find(plan => plan.date === todayKey) : null;
+      if (currentMonth && todayPlan) renderPlanCard(todayPlan, todayGrid);
+      else if (currentMonth) {
         todayGrid.innerHTML = '<button class="month-empty" type="button" id="empty-today">今天还没有计划。<br>点击这里，写下今天想完成的事。</button>';
         $('empty-today').addEventListener('click', startNewPlan);
       }
       const tomorrowDate = new Date(`${todayKey}T12:00:00`);
       tomorrowDate.setDate(tomorrowDate.getDate() + 1);
       const tomorrowKey = dateKey(tomorrowDate);
-      const tomorrowPlan = savedPlans.find(plan => plan.date === tomorrowKey);
-      if (tomorrowPlan) renderPlanCard(tomorrowPlan, tomorrowGrid);
-      else {
+      const tomorrowPlan = currentMonth ? selectedPlans.find(plan => plan.date === tomorrowKey) : null;
+      if (currentMonth && tomorrowPlan) renderPlanCard(tomorrowPlan, tomorrowGrid);
+      else if (currentMonth) {
         tomorrowGrid.innerHTML = '<button class="month-empty history-empty" type="button" id="empty-tomorrow">明天还没有计划。<br>点击这里提前安排。</button>';
         $("empty-tomorrow").addEventListener('click', () => {
           newPlanMode = true;
@@ -499,29 +796,78 @@
           setTimeout(() => $('plan-date').focus(), 0);
         });
       }
-      const history = savedPlans.filter(plan => plan.date !== todayKey).sort((a, b) => b.date.localeCompare(a.date));
-      const historicalPlans = history.filter(plan => plan.date !== tomorrowKey);
+      const historicalPlans = selectedPlans
+        .filter(plan => !currentMonth || (plan.date !== todayKey && plan.date !== tomorrowKey))
+        .sort((a, b) => b.date.localeCompare(a.date));
+      const selectedDate = new Date(`${selectedMonth}-01T12:00:00`);
+      $('history-title').textContent = currentMonth ? '本月其他计划' : `${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月计划`;
       $('history-count').textContent = `${historicalPlans.length} 天`;
-      if (!historicalPlans.length) historyGrid.innerHTML = '<div class="month-empty history-empty">还没有历史计划。<br>完成一天的计划后，它会出现在这里。</div>';
+      if (!historicalPlans.length) historyGrid.innerHTML = `<div class="month-empty history-empty">${currentMonth ? '还没有其他历史计划。' : '这个月还没有计划。'}<br>保存计划后会出现在这里。</div>`;
       historicalPlans.forEach(plan => renderPlanCard(plan, historyGrid));
+    };
+    const renderAccountAvatar = () => {
+      const avatar = $('account-avatar');
+      if (!avatar) return;
+      avatar.innerHTML = account.avatar ? `<img src="${account.avatar}" alt="账户头像">` : 'P';
     };
     const updateDateChip = () => { $('today').textContent = formatDate(activeDate); };
     const showMonthView = () => {
+      window.mainlineLeave?.();
+      $('time-view').hidden = true;
+      $('nav-time').classList.remove('active');
       commitEdit();
       closeNote();
-      monthCursor = new Date(`${activeDate}T12:00:00`);
+      const monthPicker = $('month-picker');
+      if (!monthPicker.value) monthPicker.value = monthInputValue(new Date(`${activeDate}T12:00:00`));
+      monthCursor = new Date(`${monthPicker.value}-01T12:00:00`);
       $('day-view').hidden = true;
       $('checklist-view').hidden = true;
+      $('account-view').hidden = true;
       $('month-view').hidden = false;
       $('back-to-month').hidden = true;
-      $('today').textContent = '月度视角';
+      $('history-actions').hidden = true;
+      $('month-picker-wrap').hidden = false;
+      $('today').hidden = true;
+      $('nav-daily').classList.add('active');
+      $('nav-account').classList.remove('active');
       renderMonth();
     };
+    const showAccountView = () => {
+      window.mainlineLeave?.();
+      $('time-view').hidden = true;
+      $('nav-time').classList.remove('active');
+      commitEdit();
+      closeNote();
+      $('day-view').hidden = true;
+      $('checklist-view').hidden = true;
+      $('month-view').hidden = true;
+      $('account-view').hidden = false;
+      $('back-to-month').hidden = true;
+      $('history-actions').hidden = true;
+      $('month-picker-wrap').hidden = true;
+      $('today').hidden = true;
+      $('account-phone').value = '';
+      $('account-phone').readOnly = false;
+      $('account-password').value = '';
+      pendingAvatar = account.avatar || '';
+      renderAccountAvatar();
+      $('nav-daily').classList.remove('active');
+      $('nav-account').classList.add('active');
+    };
     const showEditorView = (step = 'auto') => {
+      $('nav-daily').classList.add('active');
+      $('nav-account').classList.remove('active');
+      window.mainlineLeave?.();
+      $('time-view').hidden = true;
+      $('nav-time').classList.remove('active');
       $('month-view').hidden = true;
       $('checklist-view').hidden = true;
+      $('account-view').hidden = true;
       $('day-view').hidden = false;
       $('back-to-month').hidden = false;
+      $('history-actions').hidden = true;
+      $('month-picker-wrap').hidden = true;
+      $('today').hidden = false;
       updateDateChip();
       $('plan-date').value = activeDate;
       $('story').value = state.story;
@@ -535,10 +881,19 @@
       updateHistoryControls();
     };
     const showChecklistView = () => {
+      $('nav-daily').classList.add('active');
+      $('nav-account').classList.remove('active');
+      window.mainlineLeave?.();
+      $('time-view').hidden = true;
+      $('nav-time').classList.remove('active');
       $('month-view').hidden = true;
       $('day-view').hidden = true;
+      $('account-view').hidden = true;
       $('checklist-view').hidden = false;
       $('back-to-month').hidden = false;
+      $('history-actions').hidden = false;
+      $('month-picker-wrap').hidden = true;
+      $('today').hidden = false;
       updateDateChip();
       $('checklist-story').textContent = state.story.trim();
       updateSummary();
@@ -634,23 +989,34 @@
       request.onerror = () => reject(request.error || new Error('无法打开本地文件存储'));
     });
     const makeFileId = () => window.crypto?.randomUUID?.() || `file-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const attachmentStorageId = id => id;
     const saveAttachment = async (file) => {
       const id = makeFileId();
       const db = await fileDb;
       await new Promise((resolve, reject) => {
-        const request = db.transaction(FILE_STORE, 'readwrite').objectStore(FILE_STORE).put({ id, name: file.name, type: file.type, size: file.size, blob: file });
-        request.onsuccess = resolve;
-        request.onerror = () => reject(request.error || new Error('文件保存失败'));
+        const tx = db.transaction(FILE_STORE, 'readwrite');
+        tx.objectStore(FILE_STORE).put({ id: attachmentStorageId(id), name: file.name, type: file.type, size: file.size, blob: file });
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error || new Error('文件保存失败'));
+        tx.onabort = () => reject(tx.error || new Error('文件保存已取消'));
       });
+      if (window.CloudClient?.isLoggedIn()) {
+        try { await CloudClient.upload(file, id); } catch (error) { console.warn('云端附件上传失败', error); }
+      }
       return { id, name: file.name, type: file.type, size: file.size };
     };
-    const readAttachment = async (id) => {
+    const readLocalAttachment = async (id) => {
       const db = await fileDb;
       return new Promise((resolve, reject) => {
-        const request = db.transaction(FILE_STORE, 'readonly').objectStore(FILE_STORE).get(id);
+        const request = db.transaction(FILE_STORE, 'readonly').objectStore(FILE_STORE).get(attachmentStorageId(id));
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error || new Error('文件读取失败'));
       });
+    };
+    const readAttachment = async id => {
+      const local = await readLocalAttachment(id);
+      if (local?.blob) return local;
+      return null;
     };
     const openStoredFile = async (file) => {
       if (!file.id) return toast('这是旧版本保存的文件名，请重新添加原文件');
@@ -658,9 +1024,12 @@
       if (!popup) return toast('浏览器阻止了打开新窗口，请允许弹窗后重试');
       try {
         const stored = await readAttachment(file.id);
+        if (!stored?.blob && window.CloudClient?.isLoggedIn()) return await CloudClient.openFile(file);
         if (!stored?.blob) throw new Error('找不到文件内容');
         const url = URL.createObjectURL(stored.blob);
-        popup.location.href = url;
+        // Download arbitrary attachments instead of executing HTML/SVG in this origin.
+        popup.close();
+        const link = document.createElement('a'); link.href = url; link.download = file.name; link.click();
         setTimeout(() => URL.revokeObjectURL(url), 60000);
       } catch (error) {
         popup.close();
@@ -1237,10 +1606,10 @@
       try {
         await saveCurrentPlan();
         newPlanMode = false;
-        toast('写好了，计划已保存到数据库');
+        toast('写好了，计划已保存在本机');
       } catch (error) {
         console.error('保存计划失败', error);
-        toast('数据库暂时不可用，已保存在本机');
+        toast('保存失败，内容仍保留在本机');
       } finally {
         button.disabled = false;
         showChecklistView();
@@ -1248,7 +1617,66 @@
     });
     $('edit-current-plan').addEventListener('click', () => showEditorView('details'));
     $('back-to-month').addEventListener('click', showMonthView);
-    $('new-today-plan').addEventListener('click', startNewPlan);
+    $('month-picker').addEventListener('change', (event) => {
+      monthCursor = new Date(`${event.target.value}-01T12:00:00`);
+      renderMonth();
+    });
+    const closeSidebar = () => $('sidebar-backdrop').classList.remove('open');
+    $('sidebar-toggle').addEventListener('click', () => $('sidebar-backdrop').classList.add('open'));
+    $('sidebar-close').addEventListener('click', closeSidebar);
+    $('sidebar-backdrop').addEventListener('click', (event) => { if (event.target === $('sidebar-backdrop')) closeSidebar(); });
+    $('nav-daily').addEventListener('click', () => { closeSidebar(); showMonthView(); });
+    $('nav-account').addEventListener('click', () => { closeSidebar(); showAccountView(); });
+    $('account-avatar-input').addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = new Image();
+        image.onload = () => {
+          const maxSide = 512;
+          const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+          pendingAvatar = canvas.toDataURL('image/jpeg', .82);
+          account.avatar = pendingAvatar;
+          renderAccountAvatar();
+        };
+        image.src = String(reader.result || '');
+      };
+      reader.readAsDataURL(file);
+    });
+    $('save-account').addEventListener('click', () => {
+      localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ avatar: pendingAvatar || '' }));
+      CloudClient.scheduleSave();
+      toast('头像已保存');
+    });
+    const accountAction = async register => {
+      const username = $('account-phone').value.trim();
+      const password = $('account-password').value;
+      if (!username || !password) return toast('请输入账户名和密码');
+      try { await CloudClient.login(username, password, register); } catch (error) { toast(error.message); }
+    };
+    $('account-login').addEventListener('click', () => accountAction(false));
+    $('account-register').addEventListener('click', () => accountAction(true));
+    $('account-logout').addEventListener('click', async () => { try { await CloudClient.logout(); } catch (error) { toast(error.message); } });
+    $('cloud-save').addEventListener('click', async () => { try { await CloudClient.save(); toast('已保存到云端'); } catch (error) { toast(error.message); } });
+    $('cloud-import').addEventListener('click', async () => { try { await CloudClient.save(); toast('本机数据已导入云端'); } catch (error) { toast(error.message); } });
+    $('cloud-reload').addEventListener('click', async () => { try { const data = await CloudClient.request('/data'); CloudClient.applyData(data); loadAccountCache(); showMonthView(); toast('已重新加载云端数据'); } catch (error) { toast(error.message); } });
+    window.addEventListener('cloud-auth-changed', (event) => {
+      const logged = Boolean(event.detail);
+      $('account-login').hidden = logged;
+      $('account-register').hidden = logged;
+      $('account-logout').hidden = !logged;
+      $('account-password-field').hidden = logged;
+      $('account-phone').readOnly = logged;
+      if (logged) $('account-phone').value = event.detail.username;
+      $('cloud-save').disabled = !logged;
+      $('cloud-import').disabled = !logged;
+      $('cloud-reload').disabled = !logged;
+    });
     $('undo-action').addEventListener('click', undo);
     $('redo-action').addEventListener('click', redo);
     $('skip-note').addEventListener('click', closeNote);
@@ -1292,32 +1720,11 @@
       renderFileList([...new Set([...existing, ...[...e.target.files].map(file => file.name)])]);
     });
     $('note-modal').addEventListener('click', (e) => { if (e.target === $('note-modal')) closeNote(); });
-    const bootstrap = async () => {
-      try {
-        const localPlans = [...savedPlans];
-        let remotePlans = (await apiRequest('/plans')).map(plan => normalizePlanState(plan, plan.date));
-        const remoteDates = new Set(remotePlans.map(plan => plan.date));
-        for (const localPlan of localPlans) {
-          if (!remoteDates.has(localPlan.date)) {
-            await savePlanToApi(localPlan);
-          }
-        }
-        remotePlans = (await apiRequest('/plans')).map(plan => normalizePlanState(plan, plan.date));
-        savedPlans = remotePlans;
-        persistArchive();
-        const remoteCurrent = savedPlans.find(plan => plan.date === activeDate);
-        if (remoteCurrent) {
-          state = normalizePlanState(remoteCurrent, activeDate);
-          persist();
-        }
-        showMonthView();
-      } catch (error) {
-        console.error('连接数据库失败', error);
-        showMonthView();
-        toast('数据库暂时不可用，当前使用本机缓存');
-      }
-    };
+    const bootstrap = async () => showMonthView();
     bootstrap();
   </script>
+  <script src="time-tracker.js"></script>
+  <script src="mainline-model.js"></script>
+  <script src="mainline.js"></script>
 </body>
 </html>

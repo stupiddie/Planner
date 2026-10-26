@@ -1,0 +1,60 @@
+#mainline-view [hidden], #mainline-view[hidden], #ml-suggestions[hidden] { display: none !important; }
+.ml-hero { margin: 45px 0 34px; }
+.ml-hero h1 { font-size: clamp(30px, 5vw, 52px); line-height: 1.35; letter-spacing: -.045em; font-weight: 600; }
+.ml-hero p { color: var(--muted); }
+.ml-create { display: flex; gap: 12px; max-width: 650px; margin-bottom: 45px; }
+.ml-create input { min-width: 0; flex: 1; }
+#mainline-view input:not([type="range"]):not([type="file"]), #mainline-view textarea { border: 1px solid var(--line); border-radius: 13px; padding: 12px 14px; background: var(--paper); color: var(--ink); font: inherit; width: 100%; }
+#mainline-view textarea { resize: vertical; min-height: 85px; line-height: 1.7; }
+#mainline-view input:focus-visible, #mainline-view textarea:focus-visible { outline: 2px solid #777; outline-offset: 3px; }
+.ml-spine { position: relative; padding: 8px 0 100px 65px; min-height: 60vh; max-width: 850px; }
+.ml-spine::before { content: ''; position: absolute; top: 0; bottom: 0; left: 20px; width: 2px; background: linear-gradient(var(--ink) 80%, transparent); }
+.ml-line-card { display: block; position: relative; width: 100%; border: 1px solid var(--line); border-radius: 24px; padding: 30px; margin: 0 0 36px; text-align: left; background: var(--panel); color: var(--ink); transition: transform .2s, box-shadow .2s; }
+.ml-line-card::before { content: ''; position: absolute; top: 43px; left: -46px; width: 45px; height: 1px; background: var(--line); }
+.ml-line-card::after { content: ''; position: absolute; top: 37px; left: -51px; width: 10px; height: 10px; border: 2px solid var(--ink); border-radius: 50%; background: var(--paper); }
+.ml-line-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.ml-line-card h2 { margin: 12px 0 18px; font-size: 24px; overflow-wrap: anywhere; }
+.ml-card-meta { display: flex; flex-wrap: wrap; gap: 15px; color: var(--muted); font-size: 12px; }
+.ml-detail-heading { margin: 35px 0; }
+.ml-detail-heading h1 { font-size: 38px; overflow-wrap: anywhere; }
+.ml-detail-heading .hint { overflow-wrap: anywhere; line-height: 1.8; }
+.ml-tabs { display: flex; gap: 6px; padding: 6px; border-radius: 18px; background: #e9e9e6; width: fit-content; }
+.ml-tabs button { border: 0; background: transparent; color: #777; border-radius: 13px; padding: 12px 24px; }
+.ml-tabs button.active { background: var(--ink); color: white; }
+.ml-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 34px 0 22px; }
+.ml-section-heading h2 { font-size: 20px; font-weight: 500; }
+.ml-editor-card { background: white; border: 1px solid var(--line); padding: clamp(20px, 4vw, 36px); border-radius: 24px; margin-bottom: 22px; }
+.ml-fields { display: grid; grid-template-columns: 1fr 240px; gap: 20px; }
+.ml-field { display: grid; gap: 10px; margin-bottom: 20px; font-size: 13px; color: #666; }
+.ml-progress-heading { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; }
+.ml-range { width: 100%; height: 8px; appearance: none; -webkit-appearance: none; border-radius: 10px; background: linear-gradient(to right, var(--ink) var(--progress), var(--gray-surface) var(--progress)); cursor: pointer; margin: 10px 0 28px; }
+.ml-range::-webkit-slider-thumb { appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); border: 3px solid white; box-shadow: 0 0 0 1px var(--ink); }
+.ml-range::-moz-range-thumb { width: 17px; height: 17px; border-radius: 50%; background: var(--ink); border: 3px solid white; }
+.ml-qa { border-top: 1px solid var(--line); padding-top: 22px; }
+.ml-qa h3 { font-size: 15px; margin: 0 0 22px; }
+.ml-qa-row { padding: 16px; border-radius: 16px; background: var(--soft); margin-bottom: 14px; }
+.ml-qa-row .ml-field:last-child { margin-bottom: 0; }
+.ml-small-button { border: 1px solid var(--line); border-radius: 12px; padding: 10px 15px; color: var(--ink); background: white; font-size: 13px; }
+.ml-photo-strip { display: flex; overflow-x: auto; gap: 12px; scroll-snap-type: x mandatory; border-radius: 16px; margin-bottom: 16px; overscroll-behavior-x: contain; }
+.ml-photo { flex: 0 0 100%; margin: 0; scroll-snap-align: center; min-width: 0; }
+.ml-photo img { display: block; width: 100%; height: clamp(220px, 38vw, 420px); object-fit: contain; background: var(--soft); border-radius: 16px; }
+.ml-photo figcaption { color: var(--muted); font-size: 12px; padding: 8px 0; text-align: center; }
+.ml-photo-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+.ml-photo-upload { display: inline-flex; align-items: center; cursor: pointer; }
+.ml-photo-upload:focus-within { outline: 2px solid var(--ink); outline-offset: 3px; }
+.ml-photo-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.ml-empty { color: var(--muted); padding: 30px 8px; line-height: 1.9; font-size: 14px; }
+.ml-log-month { margin: 32px 0; }
+.ml-log-month h3 { font-size: 22px; font-weight: 500; margin: 0 0 18px; }
+.ml-log-days { border-left: 1px solid #aaa; margin-left: 18px; padding: 5px 0 20px 34px; }
+.ml-log-day { position: relative; margin: 0 0 26px; }
+.ml-log-day::before { content: ''; position: absolute; left: -40px; top: 5px; width: 9px; height: 9px; background: var(--paper); border: 1px solid var(--ink); border-radius: 50%; }
+.ml-log-date { display: block; color: #777; font-size: 13px; margin-bottom: 12px; }
+.ml-log-task { width: 100%; display: flex; align-items: flex-start; gap: 14px; padding: 20px 24px; border: 1px solid var(--line); border-radius: 18px; background: white; color: var(--ink); margin: 10px 0; text-align: left; line-height: 1.7; }
+.ml-log-task.done { background: var(--ink); color: white; border-color: var(--ink); }
+.ml-log-task span:last-child { overflow-wrap: anywhere; }
+#ml-suggestions { position: fixed; z-index: 60; padding: 6px; background: white; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); max-height: 240px; overflow-y: auto; }
+#ml-suggestions button { display: block; width: 100%; border: 0; padding: 12px; border-radius: 9px; background: white; color: var(--ink); text-align: left; overflow-wrap: anywhere; }
+#ml-suggestions button[aria-selected="true"] { color: white; background: var(--ink); }
+#ml-suggestions p { font-size: 13px; color: var(--muted); padding: 5px 10px; }
+@media (max-width: 600px) { .ml-fields { grid-template-columns: 1fr; gap: 0; } .ml-create { flex-direction: column; } .ml-section-heading { align-items: flex-start; flex-direction: column; } .ml-tabs { width: 100%; } .ml-tabs button { flex: 1; padding: 12px 10px; } .ml-spine { padding-left: 45px; } .ml-spine::before { left: 8px; } .ml-line-card::before { left: -37px; width: 36px; } .ml-line-card::after { left: -43px; } .ml-line-card { padding: 24px; } }

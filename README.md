@@ -1,17 +1,38 @@
 # 企鹅每日计划
 
-一个本地运行的每日计划工具，前端使用原生 HTML/CSS/JavaScript，后端使用 Node.js、Express 和 MySQL。
+这是一个支持本机缓存和云端个人账户的每日计划工具。未登录时仍可离线使用；登录后计划、主线、计时和附件会同步到服务器。
 
-## 本地运行
+- 每日计划、任务分组、完成状态和备注
+- 主线目标、问答、成就和每日任务日志
+- 时间记录、暂停、继续和长按结束
+- 计划附件和头像，保存在浏览器本地存储
+- 手机和电脑登录同一账户后可使用同一份数据
 
-```bash
-cd server
-npm install
-npm start
+## 使用
+
+开发时可以直接用静态服务器：
+
+```sh
+python3 -m http.server 8000
 ```
 
-然后打开项目根目录的 `index.html`。
+手机和电脑连接同一个 Wi-Fi 后，访问电脑的 `http://局域网IP:8000/`。
 
-数据库配置示例见 `server/.env.example`，实际配置文件 `server/.env` 不会提交到 Git。
+云端部署见 [`deploy/README.md`](deploy/README.md)。服务端位于 `server/`，数据库表定义位于 `server/schema.sql`。
 
-暂时停用的时间轴功能完整代码保存在 `暂存代码/时间轴/`，以后可以从该目录恢复。
+## 数据位置
+
+- 计划、主线和计时保存在浏览器 `localStorage`
+- 照片和附件保存在浏览器 `IndexedDB`
+- 登录后会将 JSON 数据保存到 MySQL，附件通过独立文件接口保存到 MySQL `MEDIUMBLOB`
+- 本机缓存仍然保留，网络失败时可以继续编辑，恢复网络后自动同步
+
+## 文件说明
+
+- `index.html`：主页面和每日计划逻辑
+- `mainline.js` / `mainline-model.js`：主线目标功能及数据逻辑
+- `time-tracker.js`：计时功能
+- `mainline.css` / `time-tracker.css`：对应页面样式
+- `vendor/gsap.min.js`：时间轴卡片动画依赖
+
+项目已经移除云端服务器、数据库、部署脚本、迁移工具、自动化测试和旧版时间轴存档，当前目录只保留本地版运行所需文件。

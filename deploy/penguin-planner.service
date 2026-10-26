@@ -1,0 +1,18 @@
+[Unit]
+Description=Penguin Planner
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=planner
+Group=planner
+WorkingDirectory=/opt/penguin-planner/server
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /opt/penguin-planner/server/server.js
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target
