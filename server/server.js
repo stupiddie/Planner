@@ -39,6 +39,15 @@ async function currentUser(req) {
 }
 async function requireUser(req, res, next) { try { req.user = await currentUser(req); if (!req.user) return res.status(401).json({ error: '请先登录' }); next(); } catch (error) { next(error); } }
 
+app.get('/api/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ ok: true, database: true });
+  } catch (error) {
+    res.status(503).json({ ok: false, database: false });
+  }
+});
+
 app.post('/api/account/register', async (req, res, next) => {
   try { const username = String(req.body?.username || '').trim(); const password = String(req.body?.password || ''); if (!validCredential(username) || password.length < 8 || password.length > 200) return res.status(400).json({ error: '用户名至少 3 个字符，密码至少 8 个字符' }); const hash = await passwordHash(password); const [result] = await pool.execute('INSERT INTO users (username,password_hash) VALUES (?,?)', [username, hash]); await createSession(result.insertId, res); res.status(201).json({ id: result.insertId, username }); }
   catch (error) { if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: '用户名已存在' }); next(error); }

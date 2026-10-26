@@ -1,5 +1,7 @@
 # 云端部署
 
+现有服务器如需“合并 main 后自动上线”，见 [GitHub Actions 配置步骤](AUTOMATIC-DEPLOYMENT.md)。首次需要安装服务器部署助手并配置 GitHub 的 production 环境变量与 Secrets；保存工作流本身不表示自动部署已经可用。
+
 本项目按 Ubuntu 22.04/24.04、Node.js 20、MySQL 8、Nginx 和 systemd 部署。网页和 `/api` 使用同一个主机名，登录 Cookie 才能正常工作。
 
 ## 安装依赖

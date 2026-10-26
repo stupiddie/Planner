@@ -49,6 +49,7 @@ test('management permissions, feedback, activity and password lifecycle', { time
   let feedbackId, imageId;
 
   await t.test('anonymous/normal accounts cannot access admin; role is resolved server-side',async()=>{
+    const health=await request('/api/health');assert.equal(health.status,200);assert.deepEqual(health.data,{ok:true,database:true});
     for(const endpoint of ['/api/admin/summary','/api/admin/users','/api/admin/feedback']){
       assert.equal((await request(endpoint)).status,401);
       assert.equal((await request(endpoint,{cookie:user.cookie})).status,403);
