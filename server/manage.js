@@ -13,6 +13,8 @@ async function main() {
   try {
     if (command === 'migrate') {
       for (const sql of fs.readFileSync(path.join(__dirname, 'management-schema.sql'), 'utf8').split(';').filter(sql => sql.trim())) await db.query(sql);
+      const [[displayName]] = await db.query("SELECT COUNT(*) AS count FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='users' AND COLUMN_NAME='display_name'");
+      if (!Number(displayName.count)) await db.query("ALTER TABLE users ADD COLUMN display_name VARCHAR(60) NOT NULL DEFAULT '' AFTER username");
       console.log('Management tables ready. Existing accounts and plans preserved.');
     } else {
       const [users] = await db.execute('SELECT id FROM users WHERE BINARY username = BINARY ?', [username]);

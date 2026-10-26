@@ -93,6 +93,16 @@
     .account-field input:focus { border-color: var(--ink); background: #fff; }
     .account-avatar-upload { color: var(--muted); font-size: 12px; cursor: pointer; }
     .account-avatar-upload:hover { color: var(--ink); }
+    .account-name { margin: 0; min-height: 16px; color: var(--muted); font-size: 13px; }
+    .account-actions { display: grid; gap: 9px; }
+    .account-actions .primary, .account-actions .secondary { width: 100%; }
+    .account-section { display: grid; gap: 13px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .account-section[hidden] { display: none; }
+    .account-section h2 { margin: 0; font-size: 15px; letter-spacing: -.02em; }
+    .account-section .community-form { margin: 0; }
+    .account-logout { width: 100%; border: 0; border-radius: 14px; padding: 15px; color: #fff; background: var(--ink); font-size: 14px; font-weight: 650; letter-spacing: .02em; transition: background .2s; }
+    .account-logout:hover { background: #333; }
+    .account-logout[hidden] { display: none; }
 
     .layout { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(330px, .94fr); gap: 22px; align-items: start; }
     .editor-layout { display: block; }
@@ -471,25 +481,32 @@
       <div class="panel account-panel">
         <div class="account-header">
           <div class="account-avatar" id="account-avatar">P</div>
-          <label class="account-avatar-upload" for="account-avatar-input">更换头像</label>
+          <p class="account-name" id="account-name-display"></p>
+          <label class="account-avatar-upload" for="account-avatar-input">更换头像（自动保存）</label>
           <input id="account-avatar-input" type="file" accept="image/*" hidden>
         </div>
         <div class="account-form">
-          <div class="account-field"><label for="account-phone">账户名</label><input id="account-phone" type="text" autocomplete="username" placeholder="手机号或用户名"></div>
+          <div class="account-field"><label for="account-name">名称</label><input id="account-name" type="text" maxlength="60" autocomplete="nickname" placeholder="显示名称（可选）"></div>
+          <div class="account-field"><label for="account-phone">账户</label><input id="account-phone" type="text" autocomplete="username" placeholder="手机号或账户名"></div>
           <div class="account-field" id="account-password-field"><label for="account-password">密码</label><input id="account-password" type="password" autocomplete="current-password" placeholder="至少 8 个字符"></div>
-          <div class="actions account-actions"><button class="primary" id="account-login" type="button">登录</button><button class="secondary" id="account-register" type="button">注册</button><button class="secondary" id="account-logout" type="button" hidden>退出登录</button></div>
-          <div class="account-actions"><button class="secondary" id="save-account" type="button">保存头像</button><button class="secondary" id="cloud-save" type="button" disabled>手动保存云端数据</button><button class="secondary" id="cloud-import" type="button" disabled>导入本机旧数据</button><button class="secondary" id="cloud-reload" type="button" disabled>重新加载云端数据</button></div>
-          <p class="hint" id="cloud-status">未登录，数据仅保存在本机</p>
-          <details id="account-change-password" hidden>
-            <summary>修改密码</summary>
+          <div class="account-actions"><button class="primary" id="account-login" type="button">登录</button><button class="secondary" id="account-register" type="button">注册</button></div>
+          <section class="account-section" id="account-change-password" hidden>
+            <h2>修改密码</h2>
             <form id="change-password-form" class="community-form">
               <label>原密码<input name="oldPassword" type="password" autocomplete="current-password" required maxlength="200"></label>
               <label>新密码<input name="newPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="200"></label>
               <label>确认新密码<input name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="200"></label>
-              <button class="secondary" type="submit">修改并重新登录</button>
-              <p role="status" id="password-result"></p>
+              <button class="secondary" type="submit">修改密码（需重新登录）</button>
+              <p class="community-status" role="status" id="password-result"></p>
             </form>
-          </details>
+          </section>
+          <section class="account-section" id="account-cloud">
+            <h2>云端同步</h2>
+            <p class="hint">登录后修改会自动同步到云端，通常无需手动操作。</p>
+            <div class="account-actions"><button class="secondary" id="cloud-save" type="button" disabled>立即同步到云端</button><button class="secondary" id="cloud-reload" type="button" disabled>从云端重新加载</button></div>
+            <p class="hint" id="cloud-status">未登录，数据仅保存在本机</p>
+          </section>
+          <button class="account-logout" id="account-logout" type="button" hidden>退出登录</button>
         </div>
       </div>
     </section>
@@ -524,7 +541,8 @@
       return `${year}-${month}-${day}`;
     };
     const todayKey = dateKey();
-    let account = (() => { try { const raw = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null'); return { avatar: typeof raw?.avatar === 'string' ? raw.avatar : '' }; } catch (error) { return { avatar: '' }; } })();
+    let account = (() => { try { const raw = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null'); return { avatar: typeof raw?.avatar === 'string' ? raw.avatar : '', name: typeof raw?.name === 'string' ? raw.name : '' }; } catch (error) { return { avatar: '', name: '' }; } })();
+    const saveAccountCache = () => localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ avatar: account.avatar || '', name: account.name || '' }));
     const storageKey = (base) => `${base}:local`;
     [STORAGE_KEY, ARCHIVE_KEY].forEach((base) => { if (!localStorage.getItem(storageKey(base)) && localStorage.getItem(base)) localStorage.setItem(storageKey(base), localStorage.getItem(base)); });
     const TIMELINE_COLORS = ['#ffffff', '#f2f2f0', '#e7e7e4', '#d9d9d6', '#c9c9c5', '#b9b9b5'];
@@ -570,7 +588,6 @@
       localStorage.setItem(storageKey(ARCHIVE_KEY), JSON.stringify(savedPlans));
     }
     let pendingTask = null;
-    let pendingAvatar = account.avatar || '';
     const HISTORY_LIMIT = 50;
     let historyPast = [];
     let historyFuture = [];
@@ -821,7 +838,12 @@
     const renderAccountAvatar = () => {
       const avatar = $('account-avatar');
       if (!avatar) return;
-      avatar.innerHTML = account.avatar ? `<img src="${account.avatar}" alt="账户头像">` : 'P';
+      const label = (signedInAccount?.display_name || account.name || signedInAccount?.username || '').trim().slice(0, 1).toUpperCase() || 'P';
+      avatar.replaceChildren();
+      if (account.avatar) { const image = new Image(); image.src = account.avatar; image.alt = '账户头像'; avatar.append(image); }
+      else avatar.textContent = label;
+      const nameNode = $('account-name-display');
+      if (nameNode) nameNode.textContent = signedInAccount?.display_name || account.name || '';
     };
     const updateDateChip = () => { $('today').textContent = formatDate(activeDate); };
     const showMonthView = () => {
@@ -862,8 +884,8 @@
       $('today').hidden = true;
       $('account-phone').value = signedInAccount?.username || '';
       $('account-phone').readOnly = Boolean(signedInAccount);
+      $('account-name').value = signedInAccount?.display_name || account.name || '';
       $('account-password').value = '';
-      pendingAvatar = account.avatar || '';
       renderAccountAvatar();
       $('nav-daily').classList.remove('active');
       $('nav-account').classList.add('active');
@@ -1654,30 +1676,40 @@
           canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
           canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
           canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
-          pendingAvatar = canvas.toDataURL('image/jpeg', .82);
-          account.avatar = pendingAvatar;
+          account.avatar = canvas.toDataURL('image/jpeg', .82);
+          saveAccountCache();
           renderAccountAvatar();
+          toast('头像已保存');
         };
         image.src = String(reader.result || '');
       };
       reader.readAsDataURL(file);
     });
-    $('save-account').addEventListener('click', () => {
-      localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ avatar: pendingAvatar || '' }));
-      CloudClient.scheduleSave();
-      toast('头像已保存');
+    $('account-name').addEventListener('blur', async () => {
+      const name = $('account-name').value.trim();
+      if (name === (signedInAccount?.display_name ?? account.name)) return;
+      account.name = name;
+      saveAccountCache();
+      renderAccountAvatar();
+      if (!CloudClient.isLoggedIn()) return;
+      try {
+        const me = await CloudClient.request('/account/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ displayName: name }) });
+        signedInAccount = me;
+        $('account-name').value = me.display_name || '';
+        renderAccountAvatar();
+        toast('名称已保存');
+      } catch (error) { toast(error.message); }
     });
     const accountAction = async register => {
       const username = $('account-phone').value.trim();
       const password = $('account-password').value;
-      if (!username || !password) return toast('请输入账户名和密码');
-      try { await CloudClient.login(username, password, register); } catch (error) { toast(error.message); }
+      if (!username || !password) return toast('请输入账户和密码');
+      try { await CloudClient.login(username, password, register, $('account-name').value.trim()); } catch (error) { toast(error.message); }
     };
     $('account-login').addEventListener('click', () => accountAction(false));
     $('account-register').addEventListener('click', () => accountAction(true));
     $('account-logout').addEventListener('click', async () => { try { await CloudClient.logout(); } catch (error) { toast(error.message); } });
-    $('cloud-save').addEventListener('click', async () => { try { await CloudClient.save(); toast('已保存到云端'); } catch (error) { toast(error.message); } });
-    $('cloud-import').addEventListener('click', async () => { try { await CloudClient.save(); toast('本机数据已导入云端'); } catch (error) { toast(error.message); } });
+    $('cloud-save').addEventListener('click', async () => { try { await CloudClient.save(); toast('已同步到云端'); } catch (error) { toast(error.message); } });
     $('cloud-reload').addEventListener('click', async () => { try { const data = await CloudClient.request('/data'); CloudClient.applyData(data); loadAccountCache(); showMonthView(); toast('已重新加载云端数据'); } catch (error) { toast(error.message); } });
     window.addEventListener('cloud-auth-changed', (event) => {
       signedInAccount = event.detail;
@@ -1687,10 +1719,15 @@
       $('account-logout').hidden = !logged;
       $('account-password-field').hidden = logged;
       $('account-phone').readOnly = logged;
-      if (logged) $('account-phone').value = event.detail.username;
+      if (logged) {
+        $('account-phone').value = event.detail.username;
+        const displayName = event.detail.display_name || account.name || '';
+        if (account.name !== displayName) { account.name = displayName; saveAccountCache(); }
+        $('account-name').value = displayName;
+      }
       $('cloud-save').disabled = !logged;
-      $('cloud-import').disabled = !logged;
       $('cloud-reload').disabled = !logged;
+      renderAccountAvatar();
     });
     $('undo-action').addEventListener('click', undo);
     $('redo-action').addEventListener('click', redo);

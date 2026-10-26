@@ -59,6 +59,17 @@ test('management permissions, feedback, activity and password lifecycle', { time
     assert.equal((await request('/api/account/me',{cookie:admin.cookie})).data.role,'admin');
     for(const endpoint of ['/server/management-schema.sql','/server/server.js','/server/.env','/deploy/README.md'])assert.equal((await request(endpoint)).status,404);
   });
+  await t.test('display name is stored on registration and updated through the account profile',async()=>{
+    assert.equal((await request('/api/account/profile',{method:'PUT',body:{displayName:'匿名'}})).status,401);
+    assert.equal((await request('/api/account/me',{cookie:user.cookie})).data.display_name,'');
+    const named=await register('named',{displayName:'  小明  '});
+    assert.equal((await request('/api/account/me',{cookie:named.cookie})).data.display_name,'小明');
+    const updated=await request('/api/account/profile',{method:'PUT',cookie:named.cookie,body:{displayName:'新名称'}});
+    assert.equal(updated.status,200);assert.equal(updated.data.display_name,'新名称');
+    assert.equal((await request('/api/account/me',{cookie:named.cookie})).data.display_name,'新名称');
+    for(const body of [{},{displayName:123},{displayName:'a'.repeat(61)}])assert.equal((await request('/api/account/profile',{method:'PUT',cookie:named.cookie,body})).status,400);
+    assert.equal((await request('/api/account/me',{cookie:named.cookie})).data.display_name,'新名称');
+  });
   await t.test('feedback validates input and stores text and authentic image bytes',async()=>{
     assert.equal((await request('/api/feedback',{method:'POST',body:{message:'x'}})).status,401);
     for(const body of [{},{message:'a'.repeat(5001)},{images:[png,png,png,png]},{images:['data:image/svg+xml;base64,PHN2Zz4=']},{images:['data:image/png;base64,YWJjZA==']},{images:['data:image/png;base64,'+Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),Buffer.alloc(1024*1024)]).toString('base64')]}]) {

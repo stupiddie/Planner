@@ -4,6 +4,7 @@ USE penguin_planner;
 CREATE TABLE IF NOT EXISTS users (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   username VARCHAR(120) NOT NULL,
+  display_name VARCHAR(60) NOT NULL DEFAULT '',
   password_hash VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id), UNIQUE KEY users_username (username)
