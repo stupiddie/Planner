@@ -35,6 +35,8 @@ planner-deploy ALL=(root) NOPASSWD: /usr/local/sbin/planner-deploy *
 
 部署助手为 root 所有，不从应用版本覆盖自身；它只接受一个 40 位小写提交 SHA，不接受任意路径或命令。依赖安装和数据库迁移使用 `planner` 用户执行。后续修改部署助手时，需要服务器操作人员重新安装并验证它和校验脚本。
 
+临时工作目录必须放在 `/tmp/planner-deploy.XXXXXX`。`/var/lib/planner-deploy` 的权限是 root:planner-deploy 0750，应用用户 planner 无权穿过这个目录；即使内部工作目录设为 0711 也无法读取源码和写入 npm 缓存。不要通过放宽 incoming 或整个 state 目录权限来解决。已安装旧部署助手的服务器需要单独更新助手的临时目录位置；拉取应用代码不会更新 root 所有的助手。保留服务器已确认可用的 Node/npm PATH 设置。
+
 ## 2. GitHub 设置（仓库管理员执行）
 
 打开仓库 Settings → Environments → New environment，创建名称为 **production** 的环境。在该环境中填写：
