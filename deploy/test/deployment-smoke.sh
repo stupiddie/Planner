@@ -42,7 +42,9 @@ sed -e "s|^ExecStart=.*|ExecStart=$node_binary /opt/penguin-planner/server/serve
   "$repository/deploy/penguin-planner.service" > /etc/systemd/system/penguin-planner.service
 systemctl daemon-reload
 install -m 0600 "$archive" "/var/lib/planner-deploy/incoming/$revision.tar.gz"
-/usr/local/sbin/planner-deploy "$revision"
+install -d -m 0700 /root/planner-private-cwd
+# Also exercise invocation from a caller's home inaccessible to the app user.
+(cd /root/planner-private-cwd && /usr/local/sbin/planner-deploy "$revision")
 [[ "$(cat /var/lib/planner-deploy/current-commit)" == "$revision" ]]
 [[ "$(sha256sum /opt/penguin-planner/server/.env)" == "$configuration_before" ]]
 [[ "$(sha256sum /etc/cron.d/planner-ci-backup)" == "$cron_before" ]]
