@@ -40,6 +40,7 @@ jobs:
           bash -n deploy/deploy-release.sh
           bash -n deploy/send-release.sh
           shellcheck deploy/deploy-release.sh deploy/send-release.sh
+          shellcheck deploy/test/deployment-smoke.sh
           python3 -m unittest discover -s deploy/test -v
       - name: Test accounts and feedback against MySQL
         env:
@@ -49,6 +50,12 @@ jobs:
           MYSQL_USER: root
           MYSQL_PASSWORD: ci-only-password
         run: node --test server/test/management.test.js
+      - name: Exercise deployment with production directory permissions
+        run: |
+          archive="$RUNNER_TEMP/planner-deployment-test.tar.gz"
+          git archive --format=tar.gz --output="$archive" "$GITHUB_SHA"
+          sudo env GITHUB_ACTIONS=true bash deploy/test/deployment-smoke.sh \
+            "$archive" "$GITHUB_SHA" "$GITHUB_WORKSPACE" "$(command -v node)" "$(command -v npm)"
 
   deploy:
     needs: test

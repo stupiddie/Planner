@@ -2,7 +2,7 @@
 # Installed once, root-owned, at /usr/local/sbin/planner-deploy.
 # This script never executes application or package code as root.
 set -eEuo pipefail
-export PATH=/usr/bin:/bin
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 [[ $EUID -eq 0 && $# -eq 1 && "$1" =~ ^[0-9a-f]{40}$ ]] || { echo 'Usage: sudo planner-deploy <commit SHA>'; exit 1; }
 revision=$1
 target=/opt/penguin-planner
@@ -13,7 +13,10 @@ app_user=$(systemctl show "$service" -p User --value)
 [[ "$app_user" == planner ]] || { echo 'Expected service to run as the unprivileged planner user'; exit 1; }
 exec 9>"$state/deploy.lock"
 flock -w 600 9
-work=$(mktemp -d "$state/work.XXXXXX")
+# The application's planner user cannot traverse the private deployment-user state
+# directory. Keep the root-owned workspace under /tmp, then allow traversal of
+# only this workspace; incoming archives and the deployment lock stay private.
+work=$(mktemp -d /tmp/planner-deploy.XXXXXX)
 trap 'rm -rf -- "$work"' EXIT
 backup="/var/backups/penguin-planner/code-$(date -u +%Y%m%dT%H%M%SZ)-$revision.tar.gz"
 changed=false
@@ -41,7 +44,9 @@ PY
 mkdir "$work/source" "$work/npm-cache"
 python3 /usr/local/lib/planner-deploy/validate-release.py "$work/release.tar.gz" "$work/source" "$revision"
 chmod 0711 "$work"
+find "$work/source" -type d -exec chmod 0755 {} +
 chown -R planner:planner "$work/source" "$work/npm-cache"
+cd "$work/source/server"
 runuser -u planner -- env "npm_config_cache=$work/npm-cache" npm ci --prefix "$work/source/server" --omit=dev --no-audit --no-fund
 install -d -m 0700 /var/backups/penguin-planner
 # Preserve source, installed dependencies and local files; the original .env stays in place.
