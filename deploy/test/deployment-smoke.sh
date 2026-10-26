@@ -44,10 +44,11 @@ systemctl daemon-reload
 install -m 0600 "$archive" "/var/lib/planner-deploy/incoming/$revision.tar.gz"
 install -d -m 0700 /root/planner-private-cwd
 # Also exercise invocation from a caller's home inaccessible to the app user.
-(cd /root/planner-private-cwd && /usr/local/sbin/planner-deploy "$revision")
+(umask 077; cd /root/planner-private-cwd && /usr/local/sbin/planner-deploy "$revision")
 [[ "$(cat /var/lib/planner-deploy/current-commit)" == "$revision" ]]
 [[ "$(sha256sum /opt/penguin-planner/server/.env)" == "$configuration_before" ]]
 [[ "$(sha256sum /etc/cron.d/planner-ci-backup)" == "$cron_before" ]]
 systemctl is-active --quiet penguin-planner
+runuser -u www-data -- test -r /opt/penguin-planner/index.html
 curl --fail --silent --show-error http://127.0.0.1:3000/api/health
 echo 'PASS: real unprivileged dependency installation, deployment, migration, startup and preserved configuration'

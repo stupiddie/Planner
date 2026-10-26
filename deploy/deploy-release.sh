@@ -44,6 +44,7 @@ PY
 mkdir "$work/source" "$work/npm-cache"
 python3 /usr/local/lib/planner-deploy/validate-release.py "$work/release.tar.gz" "$work/source" "$revision"
 chmod 0711 "$work"
+find "$work/source" -type d -exec chmod 0755 {} +
 chown -R planner:planner "$work/source" "$work/npm-cache"
 cd "$work/source/server"
 runuser -u planner -- env "npm_config_cache=$work/npm-cache" npm ci --prefix "$work/source/server" --omit=dev --no-audit --no-fund
