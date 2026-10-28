@@ -1,5 +1,6 @@
 (() => {
   const KEY = 'penguin-time-records-v1';
+  const makeId = () => window.crypto?.randomUUID?.() || `time-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   let selected = null;
   let holdTimer = null;
   let held = false;
@@ -84,7 +85,7 @@
     event.preventDefault();
     const name = $('time-name').value.trim();
     if (!name) { $('time-name').focus(); return; }
-    mutate(cards => cards.push({ id: crypto.randomUUID(), name, sessions: [] }));
+    mutate(cards => cards.push({ id: makeId(), name, sessions: [] }));
     $('time-name').value = '';
   });
   $('time-back').addEventListener('click', () => { cancelHold(); selected = null; render(); });

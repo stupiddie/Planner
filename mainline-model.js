@@ -8,7 +8,7 @@
       const plans = new Map(lines.map(plan => [plan.date, plan]));
       if (draft?.date) plans.set(draft.date, draft);
       return [...plans.values()].sort((a, b) => b.date.localeCompare(a.date)).flatMap(plan =>
-        plan.groups.flatMap(group => group.tasks).filter(task => task.text.includes(model.tag(name)))
+        (Array.isArray(plan.tasks) ? plan.tasks : (plan.groups || []).flatMap(group => group.tasks || [])).filter(task => task.text.includes(model.tag(name)))
           .map(task => ({ date: plan.date, text: task.text, done: Boolean(task.done) })));
     },
     completion(text, caret) {
