@@ -1,6 +1,6 @@
 (function () {
   const API = window.PLANNER_API_BASE || '/api';
-  const keys = { plan: 'penguin-daily-plan-v1:local', archive: 'penguin-daily-plans-v1:local', time: 'penguin-time-records-v1:local', mainline: 'penguin-mainlines-v1:local', account: 'penguin-planner-local-account-v1' };
+  const keys = { plan: 'penguin-daily-plan-v1:local', archive: 'penguin-daily-plans-v1:local', time: 'penguin-time-records-v1:local', mainline: 'penguin-mainlines-v1:local', notifications: 'penguin-notifications-v1:local', account: 'penguin-planner-local-account-v1' };
   let loggedIn = false;
   let saveTimer = null;
   const originalSetItem = Storage.prototype.setItem;
@@ -15,7 +15,7 @@
   async function refresh() { const me = await request('/account/me'); loggedIn = true; authChanged(me); setStatus(`已登录：${me.username}`); const data = await request('/data'); if (data && Object.keys(data).length) { applyData(data); if (!sessionStorage.getItem('planner-cloud-hydrated')) { sessionStorage.setItem('planner-cloud-hydrated', '1'); location.reload(); } } return me; }
   async function login(username, password, register, displayName) { const me = await request(`/account/${register ? 'register' : 'login'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(register && displayName ? { username, password, displayName } : { username, password }) }); loggedIn = true; const data = await request('/data'); if (!Object.keys(data || {}).length) await save(); else applyData(data); sessionStorage.setItem('planner-cloud-hydrated', '1'); location.reload(); return me; }
   async function logout() { await request('/account/logout', { method: 'POST' }); loggedIn = false; Object.values(keys).forEach(key => localStorage.removeItem(key)); authChanged(null); sessionStorage.removeItem('planner-cloud-hydrated'); location.reload(); }
-  async function upload(file, id = crypto.randomUUID()) { if (!loggedIn) throw new Error('请先登录'); await request(`/files/${id}`, { method: 'PUT', headers: { 'Content-Type': file.type || 'application/octet-stream', 'X-File-Name': encodeURIComponent(file.name) }, body: file }); return { id, name: file.name, type: file.type, size: file.size }; }
+  async function upload(file, id = window.crypto?.randomUUID?.() || `file-${Date.now()}-${Math.random().toString(16).slice(2)}`) { if (!loggedIn) throw new Error('请先登录'); await request(`/files/${id}`, { method: 'PUT', headers: { 'Content-Type': file.type || 'application/octet-stream', 'X-File-Name': encodeURIComponent(file.name) }, body: file }); return { id, name: file.name, type: file.type, size: file.size }; }
   async function fetchFile(id) { if (!loggedIn) throw new Error('请先登录'); const response = await fetch(`${API}/files/${encodeURIComponent(id)}`, { credentials: 'include' }); if (!response.ok) throw new Error('文件不存在'); return response.blob(); }
   async function openFile(file) { const blob = await fetchFile(file.id); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = file.name || '附件'; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 60000); }
   window.CloudClient = { request, localData, applyData, save, scheduleSave, login, logout, refresh, fetchFile, upload, openFile, isLoggedIn: () => loggedIn };
